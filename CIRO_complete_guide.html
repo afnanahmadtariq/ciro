@@ -1,0 +1,1852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIRO — Complete Implementation Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090d;--bg2:#0c0f16;--bg3:#11151e;--bg4:#181e2c;
+  --line:rgba(255,255,255,.05);--line2:rgba(255,255,255,.10);--line3:rgba(255,255,255,.17);
+  --text:#d8e0f0;--muted:#6a7a98;--dim:#2e3a50;
+  --ag:#9b6fff;--agb:rgba(155,111,255,.20);--agbg:rgba(155,111,255,.09);
+  --lg:#22d4c8;--lgb:rgba(34,212,200,.22);--lgbg:rgba(34,212,200,.08);
+  --fl:#54a9ff;--flb:rgba(84,169,255,.22);--flbg:rgba(84,169,255,.08);
+  --nx:#e8e8e8;--nxb:rgba(232,232,232,.20);--nxbg:rgba(232,232,232,.06);
+  --be:#34d469;--beb:rgba(52,212,105,.22);--bebg:rgba(52,212,105,.08);
+  --db:#ff6eb4;--dbb:rgba(255,110,180,.22);--dbbg:rgba(255,110,180,.08);
+  --fr:#ffaa33;--frb:rgba(255,170,51,.22);--frbg:rgba(255,170,51,.08);
+  --re:#ff5c5c;--reb:rgba(255,92,92,.22);--rebg:rgba(255,92,92,.08);
+  --gr:#aabbcc;--grb:rgba(170,187,204,.18);--grbg:rgba(170,187,204,.06);
+}
+html{scroll-behavior:smooth;scroll-padding-top:56px}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.65;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:48px 48px;pointer-events:none}
+
+/* ── NAVBAR ── */
+nav{position:sticky;top:0;z-index:100;background:rgba(7,9,13,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--line2);padding:0 24px;display:flex;align-items:center;gap:0;overflow-x:auto;scrollbar-width:none;height:52px}
+nav::-webkit-scrollbar{display:none}
+.nav-logo{font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#fff;padding-right:20px;border-right:1px solid var(--line2);margin-right:8px;white-space:nowrap;flex-shrink:0}
+.nav-logo span{color:var(--ag)}
+.nav-link{font-family:'JetBrains Mono',monospace;font-size:10.5px;padding:0 13px;height:52px;display:flex;align-items:center;color:var(--muted);text-decoration:none;white-space:nowrap;border-bottom:2px solid transparent;transition:all .15s;flex-shrink:0}
+.nav-link:hover{color:var(--text)}
+.nav-link.ag:hover,.nav-link.ag.active{color:var(--ag);border-color:var(--ag)}
+.nav-link.fl:hover,.nav-link.fl.active{color:var(--fl);border-color:var(--fl)}
+.nav-link.nx:hover,.nav-link.nx.active{color:var(--nx);border-color:var(--nx)}
+.nav-link.be:hover,.nav-link.be.active{color:var(--be);border-color:var(--be)}
+.nav-link.api:hover,.nav-link.api.active{color:var(--fr);border-color:var(--fr)}
+.nav-link.db:hover,.nav-link.db.active{color:var(--db);border-color:var(--db)}
+.nav-link.lg:hover,.nav-link.lg.active{color:var(--lg);border-color:var(--lg)}
+.nav-link.fapi:hover,.nav-link.fapi.active{color:var(--gr);border-color:var(--gr)}
+.nav-link.atrace:hover,.nav-link.atrace.active{color:var(--ag);border-color:var(--ag)}
+.nav-link.cc:hover,.nav-link.cc.active{color:var(--re);border-color:var(--re)}
+
+/* ── LAYOUT ── */
+.page{position:relative;z-index:1}
+.section{padding:52px 24px;max-width:1060px;margin:0 auto;border-bottom:1px solid var(--line)}
+.section:last-child{border-bottom:none}
+
+/* ── SEC HEADER ── */
+.sec-hd{margin-bottom:32px}
+.sec-eyebrow{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:10px}
+.sec-eyebrow::before{content:'';width:18px;height:1px}
+.sec-title{font-family:'Syne',sans-serif;font-size:clamp(22px,4vw,34px);font-weight:800;color:#fff;letter-spacing:-.02em;line-height:1.1;margin-bottom:10px}
+.sec-desc{font-size:14px;color:var(--muted);max-width:680px;line-height:1.6}
+
+/* eyebrow colors */
+.ey-ag{color:var(--ag)}.ey-ag::before{background:var(--ag)}
+.ey-fl{color:var(--fl)}.ey-fl::before{background:var(--fl)}
+.ey-nx{color:var(--nx)}.ey-nx::before{background:var(--nx)}
+.ey-be{color:var(--be)}.ey-be::before{background:var(--be)}
+.ey-fr{color:var(--fr)}.ey-fr::before{background:var(--fr)}
+.ey-db{color:var(--db)}.ey-db::before{background:var(--db)}
+.ey-lg{color:var(--lg)}.ey-lg::before{background:var(--lg)}
+.ey-gr{color:var(--gr)}.ey-gr::before{background:var(--gr)}
+.ey-re{color:var(--re)}.ey-re::before{background:var(--re)}
+
+/* ── CARDS GRID ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:760px){.g2,.g3,.g4{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.g2,.g3,.g4{grid-template-columns:1fr}}
+
+.card{background:var(--bg2);border:1px solid var(--line2);border-radius:10px;padding:16px 18px;transition:border-color .13s}
+.card:hover{border-color:var(--line3)}
+.card-title{font-family:'Syne',sans-serif;font-size:13.5px;font-weight:700;color:#fff;margin-bottom:6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card-body{font-size:12.5px;color:var(--muted);line-height:1.6}
+.card-why{font-size:11.5px;color:var(--dim);border-top:1px solid var(--line);margin-top:8px;padding-top:8px;line-height:1.5}
+.card-why::before{content:'why → ';font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ag)}
+
+/* accent left borders */
+.c-ag{border-left:3px solid var(--ag);border-radius:0 10px 10px 0;background:var(--agbg)}
+.c-lg{border-left:3px solid var(--lg);border-radius:0 10px 10px 0;background:var(--lgbg)}
+.c-fl{border-left:3px solid var(--fl);border-radius:0 10px 10px 0;background:var(--flbg)}
+.c-nx{border-left:3px solid var(--nx);border-radius:0 10px 10px 0;background:var(--nxbg)}
+.c-be{border-left:3px solid var(--be);border-radius:0 10px 10px 0;background:var(--bebg)}
+.c-db{border-left:3px solid var(--db);border-radius:0 10px 10px 0;background:var(--dbbg)}
+.c-fr{border-left:3px solid var(--fr);border-radius:0 10px 10px 0;background:var(--frbg)}
+.c-re{border-left:3px solid var(--re);border-radius:0 10px 10px 0;background:var(--rebg)}
+.c-gr{border-left:3px solid var(--gr);border-radius:0 10px 10px 0;background:var(--grbg)}
+
+/* ── BADGES / TAGS ── */
+.badge{font-family:'JetBrains Mono',monospace;font-size:9.5px;padding:2px 8px;border-radius:4px;border:1px solid;display:inline-block;white-space:nowrap}
+.b-ag{background:var(--agbg);color:var(--ag);border-color:var(--agb)}
+.b-lg{background:var(--lgbg);color:var(--lg);border-color:var(--lgb)}
+.b-fl{background:var(--flbg);color:var(--fl);border-color:var(--flb)}
+.b-nx{background:var(--nxbg);color:var(--nx);border-color:var(--nxb)}
+.b-be{background:var(--bebg);color:var(--be);border-color:var(--beb)}
+.b-db{background:var(--dbbg);color:var(--db);border-color:var(--dbb)}
+.b-fr{background:var(--frbg);color:var(--fr);border-color:var(--frb)}
+.b-re{background:var(--rebg);color:var(--re);border-color:var(--reb)}
+.b-gr{background:var(--grbg);color:var(--gr);border-color:var(--grb)}
+
+/* ── CODE BLOCKS ── */
+.code-block{background:#080c12;border:1px solid var(--line2);border-radius:8px;overflow:hidden;margin:10px 0}
+.code-bar{background:var(--bg3);padding:7px 14px;border-bottom:1px solid var(--line);font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);display:flex;align-items:center;justify-content:space-between}
+.code-method{padding:2px 8px;border-radius:3px;border:1px solid;font-size:9.5px}
+.method-get{background:rgba(52,212,105,.12);color:#34d469;border-color:rgba(52,212,105,.25)}
+.method-post{background:rgba(84,169,255,.12);color:#54a9ff;border-color:rgba(84,169,255,.25)}
+.method-patch{background:rgba(255,170,51,.12);color:#ffaa33;border-color:rgba(255,170,51,.25)}
+.method-delete{background:rgba(255,92,92,.12);color:#ff5c5c;border-color:rgba(255,92,92,.25)}
+.method-ws{background:rgba(155,111,255,.12);color:#9b6fff;border-color:rgba(155,111,255,.25)}
+pre{padding:14px;font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.7;overflow-x:auto;color:#c8d8f0}
+.k{color:#9b6fff}.s{color:#34d469}.n{color:#54a9ff}.c{color:#6a7a98;font-style:italic}.v{color:#ffaa33}
+
+/* ── ARCH DIAGRAM ── */
+.arch-diagram{background:var(--bg2);border:1px solid var(--line2);border-radius:12px;padding:20px;margin:0 0 20px}
+.arch-row{display:flex;align-items:stretch;gap:8px;margin-bottom:6px}
+.arch-box{border:1px solid;border-radius:8px;padding:10px 14px;flex:1;text-align:center}
+.arch-box-title{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;margin-bottom:3px}
+.arch-box-sub{font-size:10.5px;color:var(--muted);line-height:1.4}
+.arch-arrow{display:flex;align-items:center;justify-content:center;padding:2px 0;font-size:13px;color:var(--dim)}
+.arch-arrow-label{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim);text-align:center;margin-top:1px}
+.arch-divider{width:1px;background:var(--line2);margin:4px 0}
+
+/* ── FLOW STEPS ── */
+.flow-steps{display:flex;flex-direction:column;gap:0}
+.flow-step{display:flex;gap:16px;align-items:flex-start;padding:12px 0}
+.flow-step+.flow-step{border-top:1px solid var(--line)}
+.fs-num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim);min-width:28px;padding-top:1px;flex-shrink:0}
+.fs-content{flex:1}
+.fs-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#fff;margin-bottom:3px}
+.fs-desc{font-size:12.5px;color:var(--muted);line-height:1.55}
+
+/* ── TABLES ── */
+.tbl{width:100%;border-collapse:collapse;background:var(--bg2);border-radius:8px;overflow:hidden;border:1px solid var(--line2);margin:10px 0}
+.tbl th{background:var(--bg3);padding:9px 14px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);text-align:left;letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--line2)}
+.tbl td{padding:9px 14px;font-size:12.5px;color:var(--muted);border-bottom:1px solid var(--line);vertical-align:top}
+.tbl tr:last-child td{border-bottom:none}
+.tbl td:first-child{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text)}
+
+/* ── SUB HEADING ── */
+.sub-h{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;color:var(--dim);text-transform:uppercase;margin:24px 0 12px;display:flex;align-items:center;gap:8px}
+.sub-h::after{content:'';flex:1;height:1px;background:var(--line)}
+
+/* ── NOTE / WARN ── */
+.note{background:var(--bg3);border:1px solid var(--line2);border-radius:7px;padding:11px 15px;font-size:12.5px;color:var(--muted);margin:10px 0;line-height:1.6}
+.note.warn{background:var(--rebg);border-color:var(--reb)}
+.note.warn::before{content:'⚠ ';color:var(--re)}
+.note.tip::before{content:'→ ';color:var(--fr)}
+.note.tip{background:var(--frbg);border-color:var(--frb)}
+
+/* ── SCREEN PREVIEW (Flutter/Next) ── */
+.screens{display:flex;flex-wrap:wrap;gap:10px}
+.screen{background:var(--bg3);border:1px solid var(--line2);border-radius:8px;padding:12px 14px;min-width:160px;flex:1}
+.screen-name{font-family:'Syne',sans-serif;font-size:12.5px;font-weight:700;color:#fff;margin-bottom:4px}
+.screen-route{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:6px}
+.screen-items{font-size:11.5px;color:var(--muted);line-height:1.6}
+.screen-items li{list-style:none;padding-left:14px;position:relative}
+.screen-items li::before{content:'·';position:absolute;left:4px;color:var(--dim)}
+
+/* ── API endpoint block ── */
+.endpoint{margin-bottom:18px}
+.ep-header{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.ep-path{font-family:'JetBrains Mono',monospace;font-size:12px;color:#fff;background:var(--bg3);padding:4px 10px;border-radius:5px;border:1px solid var(--line2)}
+.ep-desc{font-size:12.5px;color:var(--muted);margin-bottom:8px}
+
+/* ── DB SCHEMA ── */
+.schema-table{background:var(--bg2);border:1px solid var(--line2);border-radius:8px;overflow:hidden;margin-bottom:12px}
+.schema-title{background:var(--bg3);padding:9px 14px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#fff;border-bottom:1px solid var(--line2);display:flex;align-items:center;gap:10px}
+
+/* ── AGENT GRAPH ── */
+.agent-graph{display:flex;align-items:center;flex-wrap:wrap;gap:0;padding:12px 0;overflow-x:auto}
+.ag-node{background:var(--bg3);border:1px solid var(--line2);border-radius:5px;padding:5px 10px;font-size:11px;font-weight:500;color:var(--text);white-space:nowrap;flex-shrink:0}
+.ag-node.start{background:var(--lgbg);border-color:var(--lgb);color:var(--lg)}
+.ag-node.end{background:var(--bebg);border-color:var(--beb);color:var(--be)}
+.ag-node.cond{background:var(--frbg);border-color:var(--frb);color:var(--fr);border-style:dashed}
+.ag-node.loop{background:var(--agbg);border-color:var(--agb);color:var(--ag)}
+.ag-arr{color:var(--dim);padding:0 5px;font-size:11px;flex-shrink:0}
+.ag-break{width:100%;height:6px}
+
+/* ── FREE API TABLE ── */
+.api-table{width:100%;border-collapse:collapse}
+.api-table th,.api-table td{padding:8px 12px;border:1px solid var(--line);font-size:12.5px;vertical-align:top}
+.api-table th{background:var(--bg3);font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.free-yes{color:var(--be);font-family:'JetBrains Mono',monospace;font-size:11px}
+.free-partial{color:var(--fr);font-family:'JetBrains Mono',monospace;font-size:11px}
+
+/* ── TRACE DISPLAY ── */
+.trace-box{background:#080c12;border:1px solid var(--agb);border-radius:8px;overflow:hidden;margin:10px 0}
+.trace-header{background:var(--agbg);padding:8px 14px;border-bottom:1px solid var(--agb);font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ag);display:flex;align-items:center;gap:10px}
+.trace-body{padding:14px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#aabbcc;line-height:1.7;overflow-x:auto}
+.t-key{color:var(--ag)}.t-val{color:var(--be)}.t-str{color:var(--fr)}.t-num{color:var(--fl)}.t-comment{color:#3d5070}
+
+/* ── MISC ── */
+code{font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--bg3);padding:1px 5px;border-radius:3px;border:1px solid var(--line2);color:var(--fl)}
+hr{border:none;border-top:1px solid var(--line);margin:20px 0}
+.footer{text-align:center;padding:32px 24px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--dim);border-top:1px solid var(--line2)}
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <div class="nav-logo">CIRO <span>v3</span></div>
+  <a href="#architecture" class="nav-link ag">Architecture</a>
+  <a href="#flutter" class="nav-link fl">Flutter</a>
+  <a href="#nextjs" class="nav-link nx">Next.js</a>
+  <a href="#backend" class="nav-link be">Backend</a>
+  <a href="#api-schemas" class="nav-link api">API Schemas</a>
+  <a href="#database" class="nav-link db">Database</a>
+  <a href="#langgraph" class="nav-link lg">LangGraph</a>
+  <a href="#free-apis" class="nav-link fapi">Free APIs</a>
+  <a href="#antigravity" class="nav-link atrace">Antigravity Traces</a>
+  <a href="#claude-code" class="nav-link cc">Claude Code</a>
+</nav>
+
+<div class="page">
+
+<!-- ══════════════════════════ ARCHITECTURE ══════════════════════════ -->
+<section class="section" id="architecture">
+  <div class="sec-hd">
+    <div class="sec-eyebrow ey-ag">System architecture</div>
+    <div class="sec-title">Full high-level design</div>
+    <div class="sec-desc">Simplified stack — no Kafka, no Nginx, no CrewAI, no Flask. Single FastAPI service. Direct APIs. LangGraph agents + Google Antigravity at the core.</div>
+  </div>
+
+  <div class="arch-diagram">
+    <!-- Row 1: Signal sources -->
+    <div class="arch-row">
+      <div class="arch-box" style="background:var(--flbg);border-color:var(--flb)">
+        <div class="arch-box-title" style="color:var(--fl)">Social signals</div>
+        <div class="arch-box-sub">X API · Telegram Bot · Reddit PRAW · Facebook Graph · Mastodon · Bluesky</div>
+      </div>
+      <div class="arch-box" style="background:var(--lgbg);border-color:var(--lgb)">
+        <div class="arch-box-title" style="color:var(--lg)">Environmental</div>
+        <div class="arch-box-sub">Open-Meteo (free) · OpenWeatherMap · Mock IoT / MQTT generator</div>
+      </div>
+      <div class="arch-box" style="background:var(--bebg);border-color:var(--beb)">
+        <div class="arch-box-title" style="color:var(--be)">Infrastructure</div>
+        <div class="arch-box-sub">TomTom Traffic · Google Maps · Mock hospital/transport/utility</div>
+      </div>
+    </div>
+    <div class="arch-arrow">↓<div class="arch-arrow-label">polled every 30s by APScheduler (inside FastAPI)</div></div>
+
+    <!-- Row 2: Single FastAPI backend -->
+    <div class="arch-row">
+      <div class="arch-box" style="background:var(--bebg);border-color:var(--beb);flex:1">
+        <div class="arch-box-title" style="color:var(--be)">FastAPI — single backend service (Python, Uvicorn)</div>
+        <div class="arch-box-sub">REST endpoints · WebSocket /ws/feed · APScheduler signal polling · LangGraph agent runner · Antigravity trace writer · Celery async tasks</div>
+      </div>
+    </div>
+    <div class="arch-arrow">↓<div class="arch-arrow-label">calls + orchestrates</div></div>
+
+    <!-- Row 3: Antigravity + LangGraph -->
+    <div class="arch-row">
+      <div class="arch-box" style="background:var(--agbg);border-color:var(--agb);border-style:dashed;flex:1">
+        <div class="arch-box-title" style="color:var(--ag)">Google Antigravity — orchestrator (mandatory)</div>
+        <div class="arch-box-sub" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:6px">
+          <span class="badge b-lg">Signal Fusion (LG)</span>
+          <span class="badge b-lg">Crisis Detection (LG)</span>
+          <span class="badge b-lg">Severity Prediction (LG)</span>
+          <span class="badge b-lg">Resource Optimizer (LG)</span>
+          <span class="badge b-lg">Simulation (LG)</span>
+          <span class="badge b-lg">Notification (LG)</span>
+          <span class="badge b-ag">Shared state → Firestore</span>
+        </div>
+      </div>
+    </div>
+    <div class="arch-arrow">↓<div class="arch-arrow-label">reads/writes</div></div>
+
+    <!-- Row 4: Databases -->
+    <div class="arch-row">
+      <div class="arch-box" style="background:var(--dbbg);border-color:var(--dbb)">
+        <div class="arch-box-title" style="color:var(--db)">PostgreSQL</div>
+        <div class="arch-box-sub">Crisis history · Resources · Audit logs · Users</div>
+      </div>
+      <div class="arch-box" style="background:var(--agbg);border-color:var(--agb)">
+        <div class="arch-box-title" style="color:var(--ag)">Firestore</div>
+        <div class="arch-box-sub">Live crisis state · Real-time push to Flutter + Next.js</div>
+      </div>
+      <div class="arch-box" style="background:var(--frbg);border-color:var(--frb)">
+        <div class="arch-box-title" style="color:var(--fr)">Redis</div>
+        <div class="arch-box-sub">Signal cache · API cache · Celery broker · Rate limiter</div>
+      </div>
+    </div>
+    <div class="arch-arrow">↓<div class="arch-arrow-label">WebSocket + Firestore listeners + REST</div></div>
+
+    <!-- Row 5: Frontends -->
+    <div class="arch-row">
+      <div class="arch-box" style="background:var(--flbg);border-color:var(--flb)">
+        <div class="arch-box-title" style="color:var(--fl)">Flutter (mobile · mandatory)</div>
+        <div class="arch-box-sub">Riverpod · Firebase SDK · Google Maps · FCM push</div>
+      </div>
+      <div class="arch-box" style="background:var(--nxbg);border-color:var(--nxb)">
+        <div class="arch-box-title" style="color:var(--nx)">Next.js 14 (web · optional)</div>
+        <div class="arch-box-sub">App Router · Zustand · WebSocket · Mapbox GL · Tailwind</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="g3">
+    <div class="card c-re">
+      <div class="card-title">Why no Kafka?</div>
+      <div class="card-body">For hackathon scale, APScheduler polling every 30s is simpler and sufficient. Kafka adds operational complexity (Zookeeper, partitions, consumer groups) without meaningful benefit when you have one consumer. APScheduler + Redis pub/sub covers the same use case.</div>
+    </div>
+    <div class="card c-re">
+      <div class="card-title">Why one FastAPI service?</div>
+      <div class="card-body">Microservices are an operational burden during a hackathon. One FastAPI app with organized routers (crisis, resources, signals, auth, ws) is simpler to debug, deploy, and demo. Split only if specific parts need independent scaling — which CIRO doesn't at hackathon scale.</div>
+    </div>
+    <div class="card c-re">
+      <div class="card-title">Why no Nginx?</div>
+      <div class="card-body">Uvicorn (FastAPI's ASGI server) serves HTTP and WebSocket directly. Nginx adds another layer for SSL termination and load balancing — not needed for a demo running on Cloud Run or a single VM. Direct = simpler = faster to debug.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════ FLUTTER ══════════════════════════ -->
+<section class="section" id="flutter">
+  <div class="sec-hd">
+    <div class="sec-eyebrow ey-fl">Frontend · mobile mandatory</div>
+    <div class="sec-title">Flutter app — complete flow</div>
+    <div class="sec-desc">Cross-platform iOS + Android. Riverpod for reactive state. Firestore real-time listeners for live crisis updates. Google Maps for incident visualization. FCM for push alerts.</div>
+  </div>
+
+  <div class="sub-h">Dependencies (pubspec.yaml)</div>
+  <div class="code-block">
+    <div class="code-bar"><span>pubspec.yaml — key dependencies</span></div>
+    <pre><span class="c"># State management</span>
+flutter_riverpod: ^2.5.0
+riverpod_annotation: ^2.3.0
+
+<span class="c"># Firebase</span>
+firebase_core: ^2.30.0
+firebase_auth: ^4.19.0
+cloud_firestore: ^4.17.0
+firebase_messaging: ^14.9.0
+
+<span class="c"># Maps</span>
+google_maps_flutter: ^2.9.0
+
+<span class="c"># HTTP + WebSocket</span>
+dio: ^5.4.3
+web_socket_channel: ^2.4.5
+
+<span class="c"># UI</span>
+flutter_map: ^6.2.0          <span class="c"># OpenStreetMap alternative (free)</span>
+latlong2: ^0.9.1
+cached_network_image: ^3.3.1
+fl_chart: ^0.67.0             <span class="c"># charts for severity/stats</span>
+
+<span class="c"># Utils</span>
+go_router: ^13.2.4
+shared_preferences: ^2.2.3
+intl: ^0.19.0</pre>
+  </div>
+
+  <div class="sub-h">App screens & navigation</div>
+  <div class="screens">
+    <div class="screen">
+      <div class="screen-name">Splash / Auth</div>
+      <div class="screen-route">/login</div>
+      <ul class="screen-items">
+        <li>Firebase Auth (email + Google)</li>
+        <li>Role selection (field / command)</li>
+        <li>Token stored in SharedPrefs</li>
+      </ul>
+    </div>
+    <div class="screen">
+      <div class="screen-name">Crisis Map</div>
+      <div class="screen-route">/ (home)</div>
+      <ul class="screen-items">
+        <li>Live map with incident markers</li>
+        <li>Severity color coding (1–5)</li>
+        <li>Tap marker → crisis detail</li>
+        <li>Filter by type/severity</li>
+        <li>My location overlay</li>
+      </ul>
+    </div>
+    <div class="screen">
+      <div class="screen-name">Incident List</div>
+      <div class="screen-route">/crises</div>
+      <ul class="screen-items">
+        <li>Active + resolved tabs</li>
+        <li>Severity badge per item</li>
+        <li>Confidence score</li>
+        <li>Firestore real-time list</li>
+        <li>Pull-to-refresh</li>
+      </ul>
+    </div>
+    <div class="screen">
+      <div class="screen-name">Crisis Detail</div>
+      <div class="screen-route">/crisis/:id</div>
+      <ul class="screen-items">
+        <li>Full classification info</li>
+        <li>Affected radius map</li>
+        <li>Severity + confidence scores</li>
+        <li>Resource allocation view</li>
+        <li>Signal sources used</li>
+        <li>Timeline of events</li>
+        <li>Escalate / Retract buttons</li>
+      </ul>
+    </div>
+    <div class="screen">
+      <div class="screen-name">Resources</div>
+      <div class="screen-route">/resources</div>
+      <ul class="screen-items">
+        <li>All resources inventory</li>
+        <li>Available / deployed count</li>
+        <li>Current assignment per unit</li>
+        <li>Re-optimize button</li>
+        <li>Trade-off explanation</li>
+      </ul>
+    </div>
+    <div class="screen">
+      <div class="screen-name">Alert Feed</div>
+      <div class="screen-route">/alerts</div>
+      <ul class="screen-items">
+        <li>All sent notifications</li>
+        <li>Per-audience filter</li>
+        <li>Retracted alerts highlighted</li>
+        <li>Retract action</li>
+      </ul>
+    </div>
+    <div class="screen">
+      <div class="screen-name">Signal Feed</div>
+      <div class="screen-route">/signals</div>
+      <ul class="screen-items">
+        <li>Live incoming signals</li>
+        <li>Source + credibility score</li>
+        <li>Contradiction flags</li>
+        <li>Inject demo signal button</li>
+      </ul>
+    </div>
+    <div class="screen">
+      <div class="screen-name">Trace Viewer</div>
+      <div class="screen-route">/traces/:id</div>
+      <ul class="screen-items">
+        <li>Antigravity trace JSON viewer</li>
+        <li>Step-by-step agent actions</li>
+        <li>Reasoning collapsible</li>
+        <li>Tool calls list</li>
+        <li>Share/export trace</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="sub-h">Riverpod state providers</div>
+  <div class="code-block">
+    <div class="code-bar"><span>providers/crisis_provider.dart</span></div>
+    <pre><span class="c">// Real-time Firestore stream → CrisisListNotifier</span>
+@riverpod
+Stream&lt;List&lt;Crisis&gt;&gt; activeCrises(ActiveCrisesRef ref) {
+  <span class="k">return</span> FirebaseFirestore.instance
+    .collection(<span class="s">'active_crises'</span>)
+    .orderBy(<span class="s">'severity_level'</span>, descending: <span class="v">true</span>)
+    .snapshots()
+    .map((snap) =&gt; snap.docs.map(Crisis.fromDoc).toList());
+}
+
+<span class="c">// Single crisis detail</span>
+@riverpod
+Stream&lt;Crisis&gt; crisisDetail(CrisisDetailRef ref, String id) {
+  <span class="k">return</span> FirebaseFirestore.instance
+    .doc(<span class="s">'active_crises/$id'</span>)
+    .snapshots()
+    .map(Crisis.fromDoc);
+}
+
+<span class="c">// Resource inventory</span>
+@riverpod
+Stream&lt;List&lt;Resource&gt;&gt; resources(ResourcesRef ref) {
+  <span class="k">return</span> FirebaseFirestore.instance
+    .collection(<span class="s">'resource_state'</span>)
+    .snapshots()
+    .map((s) =&gt; s.docs.map(Resource.fromDoc).toList());
+}
+
+<span class="c">// WebSocket events (agent activity)</span>
+@riverpod
+Stream&lt;AgentEvent&gt; agentEvents(AgentEventsRef ref) {
+  <span class="k">final</span> channel = WebSocketChannel.connect(
+    Uri.parse(<span class="s">'ws://\${Env.apiUrl}/ws/feed'</span>));
+  <span class="k">return</span> channel.stream.map((data) =&gt; AgentEvent.fromJson(jsonDecode(data)));
+}</pre>
+  </div>
+
+  <div class="sub-h">Push notification setup (FCM)</div>
+  <div class="code-block">
+    <div class="code-bar"><span>main.dart — FCM initialization</span></div>
+    <pre><span class="k">await</span> Firebase.initializeApp();
+<span class="k">final</span> messaging = FirebaseMessaging.instance;
+<span class="k">await</span> messaging.requestPermission(alert: <span class="v">true</span>, badge: <span class="v">true</span>, sound: <span class="v">true</span>);
+
+<span class="c">// Handle foreground messages</span>
+FirebaseMessaging.onMessage.listen((message) {
+  <span class="k">if</span> (message.notification != <span class="v">null</span>) {
+    showLocalNotification(message.notification!.title, message.notification!.body);
+  }
+});
+
+<span class="c">// Subscribe to zone-based topics</span>
+<span class="k">await</span> messaging.subscribeToTopic(<span class="s">'crisis_alerts'</span>);
+<span class="k">await</span> messaging.subscribeToTopic(<span class="s">'zone_G10'</span>); <span class="c">// location-based</span></pre>
+  </div>
+</section>
+
+<!-- ══════════════════════════ NEXT.JS ══════════════════════════ -->
+<section class="section" id="nextjs">
+  <div class="sec-hd">
+    <div class="sec-eyebrow ey-nx">Frontend · web optional</div>
+    <div class="sec-title">Next.js 14 — command center dashboard</div>
+    <div class="sec-desc">SSR command center dashboard. App Router + Server Components. Zustand for UI state. WebSocket for real-time event stream. Mapbox GL for incident visualization. Antigravity trace viewer.</div>
+  </div>
+
+  <div class="sub-h">Dependencies (package.json)</div>
+  <div class="code-block">
+    <div class="code-bar"><span>package.json — key dependencies</span></div>
+    <pre><span class="c">// Core</span>
+<span class="s">"next"</span>: <span class="s">"^14.2.0"</span>,
+<span class="s">"typescript"</span>: <span class="s">"^5.4.5"</span>,
+<span class="s">"react"</span>: <span class="s">"^18.3.1"</span>,
+
+<span class="c">// State</span>
+<span class="s">"zustand"</span>: <span class="s">"^4.5.2"</span>,
+<span class="s">"@tanstack/react-query"</span>: <span class="s">"^5.35.1"</span>,
+
+<span class="c">// Firebase (for Firestore real-time alternative)</span>
+<span class="s">"firebase"</span>: <span class="s">"^10.12.0"</span>,
+<span class="s">"firebase-admin"</span>: <span class="s">"^12.1.0"</span>,
+
+<span class="c">// Maps</span>
+<span class="s">"mapbox-gl"</span>: <span class="s">"^3.4.0"</span>,
+<span class="s">"react-map-gl"</span>: <span class="s">"^7.1.7"</span>,
+
+<span class="c">// UI</span>
+<span class="s">"tailwindcss"</span>: <span class="s">"^3.4.4"</span>,
+<span class="s">"recharts"</span>: <span class="s">"^2.12.7"</span>,
+<span class="s">"react-json-tree"</span>: <span class="s">"^0.18.0"</span>,  <span class="c">// trace viewer</span>
+<span class="s">"@heroicons/react"</span>: <span class="s">"^2.1.3"</span></pre>
+  </div>
+
+  <div class="sub-h">App structure (App Router)</div>
+  <div class="screens">
+    <div class="screen">
+      <div class="screen-name">Dashboard</div>
+      <div class="screen-route">app/page.tsx</div>
+      <ul class="screen-items">
+        <li>Split: map left, incident list right</li>
+        <li>Active crisis count widgets</li>
+        <li>Resource status overview</li>
+        <li>Live agent activity feed</li>
+      </ul>
+    </div>
+    <div class="screen">
+      <div class="screen-name">Crisis Command</div>
+      <div class="screen-route">app/crisis/[id]/page.tsx</div>
+      <ul class="screen-items">
+        <li>Full crisis detail (SSR initial)</li>
+        <li>Resource allocation table</li>
+        <li>Simulation results</li>
+        <li>Stakeholder messages sent</li>
+        <li>Escalate / Retract actions</li>
+      </ul>
+    </div>
+    <div class="screen">
+      <div class="screen-name">Trace Viewer</div>
+      <div class="screen-route">app/traces/[id]/page.tsx</div>
+      <ul class="screen-items">
+        <li>Full Antigravity trace JSON</li>
+        <li>Collapsible step-by-step</li>
+        <li>Workplan at top</li>
+        <li>Reasoning + tool calls</li>
+        <li>Download as JSON button</li>
+      </ul>
+    </div>
+    <div class="screen">
+      <div class="screen-name">Resource Board</div>
+      <div class="screen-route">app/resources/page.tsx</div>
+      <ul class="screen-items">
+        <li>All 8 resource types</li>
+        <li>Deployed vs. available</li>
+        <li>Per-unit assignment</li>
+        <li>Manual override</li>
+      </ul>
+    </div>
+    <div class="screen">
+      <div class="screen-name">Signal Monitor</div>
+      <div class="screen-route">app/signals/page.tsx</div>
+      <ul class="screen-items">
+        <li>Live signal stream (WS)</li>
+        <li>Credibility score bars</li>
+        <li>Source breakdown chart</li>
+        <li>Inject demo signal</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="sub-h">Zustand stores</div>
+  <div class="code-block">
+    <div class="code-bar"><span>store/crisis-store.ts</span></div>
+    <pre><span class="k">interface</span> CrisisStore {
+  crises: Crisis[];
+  selectedId: <span class="v">string | null</span>;
+  wsStatus: <span class="s">'connected'</span> | <span class="s">'disconnected'</span>;
+  setCrises: (c: Crisis[]) =&gt; <span class="v">void</span>;
+  upsertCrisis: (c: Crisis) =&gt; <span class="v">void</span>;
+  setSelected: (id: <span class="v">string</span>) =&gt; <span class="v">void</span>;
+}
+
+<span class="k">export const</span> useCrisisStore = create&lt;CrisisStore&gt;((set) =&gt; ({
+  crises: [],
+  selectedId: <span class="v">null</span>,
+  wsStatus: <span class="s">'disconnected'</span>,
+  setCrises: (crises) =&gt; set({ crises }),
+  upsertCrisis: (crisis) =&gt; set((s) =&gt; ({
+    crises: s.crises.some(c =&gt; c.id === crisis.id)
+      ? s.crises.map(c =&gt; c.id === crisis.id ? crisis : c)
+      : [...s.crises, crisis]
+  })),
+  setSelected: (selectedId) =&gt; set({ selectedId }),
+}));</pre>
+  </div>
+
+  <div class="sub-h">WebSocket hook</div>
+  <div class="code-block">
+    <div class="code-bar"><span>hooks/useCrisisWebSocket.ts</span></div>
+    <pre"><span class="k">export function</span> useCrisisWebSocket() {
+  <span class="k">const</span> { upsertCrisis } = useCrisisStore();
+  <span class="k">useEffect</span>(() =&gt; {
+    <span class="k">const</span> ws = <span class="k">new</span> WebSocket(`<span class="s">${process.env.NEXT_PUBLIC_WS_URL}/ws/feed</span>`);
+    ws.onmessage = (e) =&gt; {
+      <span class="k">const</span> event: WSEvent = JSON.parse(e.data);
+      <span class="k">if</span> (event.type === <span class="s">'crisis_detected'</span> || event.type === <span class="s">'crisis_updated'</span>)
+        upsertCrisis(event.data);
+    };
+    <span class="k">return</span> () =&gt; ws.close();
+  }, []);
+}</pre>
+  </div>
+</section>
+
+<!-- ══════════════════════════ BACKEND ══════════════════════════ -->
+<section class="section" id="backend">
+  <div class="sec-hd">
+    <div class="sec-eyebrow ey-be">Backend · single service</div>
+    <div class="sec-title">FastAPI — complete backend design</div>
+    <div class="sec-desc">One Python service, Uvicorn ASGI. Organized into routers. APScheduler for signal polling. LangGraph agents called inline. Celery for async tasks. No gateway, no proxy needed.</div>
+  </div>
+
+  <div class="sub-h">Project structure</div>
+  <div class="code-block">
+    <div class="code-bar"><span>project structure</span></div>
+    <pre>backend/
+├── main.py                 <span class="c"># FastAPI app, startup, shutdown</span>
+├── config.py               <span class="c"># env vars, settings</span>
+├── routers/
+│   ├── auth.py             <span class="c"># POST /auth/login, GET /auth/me</span>
+│   ├── crisis.py           <span class="c"># CRUD + escalate + retract</span>
+│   ├── resources.py        <span class="c"># inventory + allocation</span>
+│   ├── signals.py          <span class="c"># signal feed + inject</span>
+│   ├── alerts.py           <span class="c"># notification history</span>
+│   ├── traces.py           <span class="c"># Antigravity trace retrieval</span>
+│   └── ws.py               <span class="c"># WebSocket /ws/feed</span>
+├── agents/
+│   ├── orchestrator.py     <span class="c"># Antigravity wrapper</span>
+│   ├── signal_fusion.py    <span class="c"># LangGraph graph 1</span>
+│   ├── crisis_detection.py <span class="c"># LangGraph graph 2</span>
+│   ├── severity.py         <span class="c"># LangGraph graph 3</span>
+│   ├── resources.py        <span class="c"># LangGraph graph 4</span>
+│   ├── simulation.py       <span class="c"># LangGraph graph 5</span>
+│   └── notification.py     <span class="c"># LangGraph graph 6</span>
+├── signals/
+│   ├── poller.py           <span class="c"># APScheduler jobs</span>
+│   ├── sources/
+│   │   ├── twitter.py      <span class="c"># X API v2</span>
+│   │   ├── telegram.py     <span class="c"># Telegram Bot API</span>
+│   │   ├── reddit.py       <span class="c"># PRAW</span>
+│   │   ├── facebook.py     <span class="c"># Facebook Graph</span>
+│   │   ├── weather.py      <span class="c"># Open-Meteo + OpenWeatherMap</span>
+│   │   ├── traffic.py      <span class="c"># TomTom / Google Maps</span>
+│   │   └── mock_iot.py     <span class="c"># random-walk sensor generator</span>
+│   └── normalizer.py       <span class="c"># → ScoredSignal schema</span>
+├── db/
+│   ├── postgres.py         <span class="c"># SQLAlchemy async engine</span>
+│   ├── firestore.py        <span class="c"># Firestore client</span>
+│   ├── redis_client.py     <span class="c"># Redis client</span>
+│   └── models/             <span class="c"># SQLAlchemy models</span>
+├── schemas/                <span class="c"># Pydantic request/response models</span>
+├── tasks/
+│   └── celery_app.py       <span class="c"># Celery worker (notifications)</span>
+└── utils/
+    ├── auth.py             <span class="c"># JWT validation</span>
+    └── fcm.py              <span class="c"># Firebase Admin SDK</span></pre>
+  </div>
+
+  <div class="sub-h">APScheduler signal polling (replaces Kafka)</div>
+  <div class="code-block">
+    <div class="code-bar"><span>signals/poller.py</span></div>
+    <pre><span class="k">from</span> apscheduler.schedulers.asyncio <span class="k">import</span> AsyncIOScheduler
+
+scheduler = AsyncIOScheduler()
+
+<span class="k">async def</span> poll_social():
+    signals = []
+    signals += <span class="k">await</span> fetch_twitter_signals()
+    signals += <span class="k">await</span> fetch_telegram_signals()
+    signals += <span class="k">await</span> fetch_reddit_signals()
+    normalized = [normalize(s) <span class="k">for</span> s <span class="k">in</span> signals]
+    <span class="k">await</span> process_signal_batch(normalized)   <span class="c"># → LangGraph</span>
+
+<span class="k">async def</span> poll_weather():
+    data = <span class="k">await</span> fetch_open_meteo()
+    <span class="k">await</span> process_signal_batch([normalize(data)])
+
+<span class="k">def</span> start_scheduler():
+    scheduler.add_job(poll_social, <span class="s">'interval'</span>, seconds=<span class="n">30</span>)
+    scheduler.add_job(poll_weather, <span class="s">'interval'</span>, minutes=<span class="n">5</span>)
+    scheduler.add_job(poll_traffic, <span class="s">'interval'</span>, minutes=<span class="n">2</span>)
+    scheduler.add_job(poll_mock_iot, <span class="s">'interval'</span>, seconds=<span class="n">15</span>)
+    scheduler.start()</pre>
+  </div>
+
+  <div class="sub-h">Main app startup</div>
+  <div class="code-block">
+    <div class="code-bar"><span>main.py</span></div>
+    <pre>app = FastAPI(title=<span class="s">"CIRO API"</span>, version=<span class="s">"1.0.0"</span>)
+
+app.include_router(auth_router, prefix=<span class="s">"/api/v1/auth"</span>)
+app.include_router(crisis_router, prefix=<span class="s">"/api/v1/crises"</span>)
+app.include_router(resources_router, prefix=<span class="s">"/api/v1/resources"</span>)
+app.include_router(signals_router, prefix=<span class="s">"/api/v1/signals"</span>)
+app.include_router(alerts_router, prefix=<span class="s">"/api/v1/alerts"</span>)
+app.include_router(traces_router, prefix=<span class="s">"/api/v1/traces"</span>)
+app.include_router(ws_router)               <span class="c"># /ws/feed</span>
+
+<span class="k">@app.on_event</span>(<span class="s">"startup"</span>)
+<span class="k">async def</span> startup():
+    <span class="k">await</span> init_postgres()
+    <span class="k">await</span> init_redis()
+    init_firestore()
+    start_scheduler()           <span class="c"># starts APScheduler polling jobs</span>
+    init_antigravity()          <span class="c"># Antigravity client init</span></pre>
+  </div>
+</section>
+
+<!-- ══════════════════════════ API SCHEMAS ══════════════════════════ -->
+<section class="section" id="api-schemas">
+  <div class="sec-hd">
+    <div class="sec-eyebrow ey-fr">API design · complete</div>
+    <div class="sec-title">All API endpoints — request &amp; response</div>
+    <div class="sec-desc">Every endpoint in the system, with full request body, response body, and HTTP status codes. Base URL: <code>https://api.ciro.app/api/v1</code></div>
+  </div>
+
+  <!-- AUTH -->
+  <div class="sub-h">Authentication</div>
+
+  <div class="endpoint">
+    <div class="ep-header">
+      <span class="code-method method-post">POST</span>
+      <span class="ep-path">/auth/login</span>
+    </div>
+    <div class="ep-desc">Authenticate user, return JWT tokens.</div>
+    <div class="g2">
+      <div class="code-block"><div class="code-bar"><span>Request</span></div>
+<pre>{
+  <span class="k">"email"</span>: <span class="s">"operator@ciro.app"</span>,
+  <span class="k">"password"</span>: <span class="s">"string"</span>
+}</pre></div>
+      <div class="code-block"><div class="code-bar"><span>Response 200</span></div>
+<pre>{
+  <span class="k">"access_token"</span>: <span class="s">"eyJ..."</span>,
+  <span class="k">"refresh_token"</span>: <span class="s">"eyJ..."</span>,
+  <span class="k">"token_type"</span>: <span class="s">"bearer"</span>,
+  <span class="k">"expires_in"</span>: <span class="n">3600</span>,
+  <span class="k">"user"</span>: {
+    <span class="k">"id"</span>: <span class="s">"usr_abc123"</span>,
+    <span class="k">"email"</span>: <span class="s">"operator@ciro.app"</span>,
+    <span class="k">"role"</span>: <span class="s">"command_center"</span>,
+    <span class="k">"name"</span>: <span class="s">"Ali Raza"</span>
+  }
+}</pre></div>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="ep-header">
+      <span class="code-method method-post">POST</span>
+      <span class="ep-path">/auth/refresh</span>
+    </div>
+    <div class="g2">
+      <div class="code-block"><div class="code-bar"><span>Request</span></div>
+<pre>{ <span class="k">"refresh_token"</span>: <span class="s">"eyJ..."</span> }</pre></div>
+      <div class="code-block"><div class="code-bar"><span>Response 200</span></div>
+<pre>{ <span class="k">"access_token"</span>: <span class="s">"eyJ..."</span>, <span class="k">"expires_in"</span>: <span class="n">3600</span> }</pre></div>
+    </div>
+  </div>
+
+  <!-- CRISES -->
+  <div class="sub-h">Crisis management</div>
+
+  <div class="endpoint">
+    <div class="ep-header">
+      <span class="code-method method-get">GET</span>
+      <span class="ep-path">/crises?status=active&amp;type=flood&amp;limit=20&amp;offset=0</span>
+    </div>
+    <div class="ep-desc">List crises. Query params: <code>status</code> (active|resolved|all), <code>type</code>, <code>severity_min</code> (1-5), <code>limit</code>, <code>offset</code>.</div>
+    <div class="code-block"><div class="code-bar"><span>Response 200</span></div>
+<pre>{
+  <span class="k">"data"</span>: [{
+    <span class="k">"id"</span>: <span class="s">"crs_g10flood_001"</span>,
+    <span class="k">"type"</span>: <span class="s">"urban_flooding"</span>,
+    <span class="k">"status"</span>: <span class="s">"active"</span>,
+    <span class="k">"severity_level"</span>: <span class="n">4</span>,
+    <span class="k">"confidence_score"</span>: <span class="n">0.87</span>,
+    <span class="k">"location"</span>: {
+      <span class="k">"lat"</span>: <span class="n">33.7215</span>, <span class="k">"lng"</span>: <span class="n">73.0433</span>,
+      <span class="k">"area_name"</span>: <span class="s">"G-10, Islamabad"</span>,
+      <span class="k">"zone"</span>: <span class="s">"G-10"</span>
+    },
+    <span class="k">"affected_radius_km"</span>: <span class="n">1.2</span>,
+    <span class="k">"affected_population"</span>: <span class="n">8400</span>,
+    <span class="k">"description"</span>: <span class="s">"Urban flooding reported in G-10 residential area"</span>,
+    <span class="k">"predicted_duration_hours"</span>: <span class="n">6</span>,
+    <span class="k">"peak_impact_time"</span>: <span class="s">"2026-05-19T18:00:00Z"</span>,
+    <span class="k">"spread_risk"</span>: <span class="s">"medium"</span>,
+    <span class="k">"uncertainty_range"</span>: { <span class="k">"min_hours"</span>: <span class="n">3</span>, <span class="k">"max_hours"</span>: <span class="n">9</span> },
+    <span class="k">"conflicting_hypotheses"</span>: [<span class="s">"water_main_burst"</span>],
+    <span class="k">"signal_count"</span>: <span class="n">14</span>,
+    <span class="k">"resources_assigned_count"</span>: <span class="n">6</span>,
+    <span class="k">"trace_id"</span>: <span class="s">"trc_xyz789"</span>,
+    <span class="k">"created_at"</span>: <span class="s">"2026-05-19T16:32:00Z"</span>,
+    <span class="k">"updated_at"</span>: <span class="s">"2026-05-19T16:45:00Z"</span>
+  }],
+  <span class="k">"total"</span>: <span class="n">3</span>,
+  <span class="k">"page"</span>: <span class="n">1</span>,
+  <span class="k">"limit"</span>: <span class="n">20</span>
+}</pre></div>
+  </div>
+
+  <div class="endpoint">
+    <div class="ep-header">
+      <span class="code-method method-get">GET</span>
+      <span class="ep-path">/crises/{id}</span>
+    </div>
+    <div class="ep-desc">Full crisis detail including signals, resources, timeline, and simulation results.</div>
+    <div class="code-block"><div class="code-bar"><span>Response 200 — extended crisis object</span></div>
+<pre>{
+  <span class="c">// ... all fields from list endpoint, plus:</span>
+  <span class="k">"signals"</span>: [{
+    <span class="k">"id"</span>: <span class="s">"sig_001"</span>, <span class="k">"source_type"</span>: <span class="s">"social"</span>, <span class="k">"platform"</span>: <span class="s">"twitter"</span>,
+    <span class="k">"raw_text"</span>: <span class="s">"water entering homes in G10..."</span>,
+    <span class="k">"credibility_score"</span>: <span class="n">0.72</span>, <span class="k">"urgency_score"</span>: <span class="n">0.88</span>
+  }],
+  <span class="k">"resource_allocation"</span>: {
+    <span class="k">"plan_id"</span>: <span class="s">"alloc_001"</span>,
+    <span class="k">"assigned_resources"</span>: [
+      { <span class="k">"resource_id"</span>: <span class="s">"res_amb_01"</span>, <span class="k">"type"</span>: <span class="s">"ambulance"</span>, <span class="k">"eta_minutes"</span>: <span class="n">8</span> },
+      { <span class="k">"resource_id"</span>: <span class="s">"res_pol_03"</span>, <span class="k">"type"</span>: <span class="s">"police_unit"</span>, <span class="k">"eta_minutes"</span>: <span class="n">5</span> }
+    ],
+    <span class="k">"trade_offs"</span>: <span class="s">"Police unit 03 prioritized here (severity 4) vs heat emergency (severity 2)"</span>
+  },
+  <span class="k">"simulation_results"</span>: [{
+    <span class="k">"action"</span>: <span class="s">"traffic_reroute"</span>,
+    <span class="k">"before_state"</span>: <span class="s">"congestion_level: high"</span>,
+    <span class="k">"after_state"</span>: <span class="s">"congestion_level: medium"</span>,
+    <span class="k">"response_time_improvement_min"</span>: <span class="n">4</span>,
+    <span class="k">"side_effects"</span>: [<span class="s">"G-9 road congestion increase +15%"</span>]
+  }],
+  <span class="k">"notifications_sent"</span>: [
+    { <span class="k">"audience"</span>: <span class="s">"public"</span>, <span class="k">"channel"</span>: <span class="s">"fcm"</span>, <span class="k">"sent_at"</span>: <span class="s">"2026-05-19T16:33:00Z"</span> }
+  ],
+  <span class="k">"timeline"</span>: [
+    { <span class="k">"time"</span>: <span class="s">"16:32"</span>, <span class="k">"event"</span>: <span class="s">"Crisis detected from 14 signals"</span> },
+    { <span class="k">"time"</span>: <span class="s">"16:33"</span>, <span class="k">"event"</span>: <span class="s">"6 resources allocated"</span> },
+    { <span class="k">"time"</span>: <span class="s">"16:34"</span>, <span class="k">"event"</span>: <span class="s">"Public alert dispatched"</span> }
+  ]
+}</pre></div>
+  </div>
+
+  <div class="endpoint">
+    <div class="ep-header">
+      <span class="code-method method-post">POST</span>
+      <span class="ep-path">/crises</span>
+      <span style="font-size:12px;color:var(--muted)">Manual crisis report</span>
+    </div>
+    <div class="g2">
+      <div class="code-block"><div class="code-bar"><span>Request</span></div>
+<pre>{
+  <span class="k">"type"</span>: <span class="s">"road_accident"</span>,
+  <span class="k">"location"</span>: {
+    <span class="k">"lat"</span>: <span class="n">33.6938</span>, <span class="k">"lng"</span>: <span class="n">73.0652</span>,
+    <span class="k">"area_name"</span>: <span class="s">"Faizabad, Islamabad"</span>
+  },
+  <span class="k">"description"</span>: <span class="s">"Multi-vehicle accident, road blocked"</span>,
+  <span class="k">"severity_estimate"</span>: <span class="n">3</span>,
+  <span class="k">"reporter"</span>: {
+    <span class="k">"type"</span>: <span class="s">"field_unit"</span>,
+    <span class="k">"id"</span>: <span class="s">"unit_07"</span>
+  }
+}</pre></div>
+      <div class="code-block"><div class="code-bar"><span>Response 201</span></div>
+<pre>{
+  <span class="k">"id"</span>: <span class="s">"crs_new_002"</span>,
+  <span class="k">"status"</span>: <span class="s">"processing"</span>,
+  <span class="k">"message"</span>: <span class="s">"Crisis submitted. Agents processing."</span>,
+  <span class="k">"trace_id"</span>: <span class="s">"trc_new_789"</span>
+}</pre></div>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="ep-header">
+      <span class="code-method method-post">POST</span>
+      <span class="ep-path">/crises/{id}/escalate</span>
+    </div>
+    <div class="g2">
+      <div class="code-block"><div class="code-bar"><span>Request</span></div>
+<pre>{
+  <span class="k">"reason"</span>: <span class="s">"Flooding spreading to G-11"</span>,
+  <span class="k">"new_severity"</span>: <span class="n">5</span>,
+  <span class="k">"requested_by"</span>: <span class="s">"usr_abc123"</span>
+}</pre></div>
+      <div class="code-block"><div class="code-bar"><span>Response 200</span></div>
+<pre>{
+  <span class="k">"crisis_id"</span>: <span class="s">"crs_g10flood_001"</span>,
+  <span class="k">"previous_severity"</span>: <span class="n">4</span>,
+  <span class="k">"new_severity"</span>: <span class="n">5</span>,
+  <span class="k">"re_allocation_triggered"</span>: <span class="v">true</span>,
+  <span class="k">"escalation_log_id"</span>: <span class="s">"esc_001"</span>
+}</pre></div>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="ep-header">
+      <span class="code-method method-post">POST</span>
+      <span class="ep-path">/crises/{id}/retract</span>
+    </div>
+    <div class="g2">
+      <div class="code-block"><div class="code-bar"><span>Request</span></div>
+<pre>{
+  <span class="k">"reason"</span>: <span class="s">"Field confirms water main burst only, not flooding"</span>,
+  <span class="k">"new_classification"</span>: <span class="s">"infrastructure_water_main"</span>,
+  <span class="k">"retracted_by"</span>: <span class="s">"usr_abc123"</span>
+}</pre></div>
+      <div class="code-block"><div class="code-bar"><span>Response 200</span></div>
+<pre>{
+  <span class="k">"crisis_id"</span>: <span class="s">"crs_g10flood_001"</span>,
+  <span class="k">"retraction_notice"</span>: <span class="s">"Alert retracted. Correction sent to all stakeholders."</span>,
+  <span class="k">"correction_notifications_sent"</span>: <span class="n">6</span>,
+  <span class="k">"updated_classification"</span>: <span class="s">"infrastructure_water_main"</span>
+}</pre></div>
+    </div>
+  </div>
+
+  <!-- RESOURCES -->
+  <div class="sub-h">Resource management</div>
+
+  <div class="endpoint">
+    <div class="ep-header">
+      <span class="code-method method-get">GET</span>
+      <span class="ep-path">/resources?type=ambulance&amp;status=available</span>
+    </div>
+    <div class="code-block"><div class="code-bar"><span>Response 200</span></div>
+<pre>{
+  <span class="k">"resources"</span>: [{
+    <span class="k">"id"</span>: <span class="s">"res_amb_01"</span>,
+    <span class="k">"type"</span>: <span class="s">"ambulance"</span>,
+    <span class="k">"name"</span>: <span class="s">"Ambulance Unit 1"</span>,
+    <span class="k">"status"</span>: <span class="s">"available"</span>,         <span class="c">// available | deployed | maintenance</span>
+    <span class="k">"location"</span>: { <span class="k">"lat"</span>: <span class="n">33.718</span>, <span class="k">"lng"</span>: <span class="n">73.044</span> },
+    <span class="k">"current_assignment"</span>: <span class="v">null</span>,
+    <span class="k">"last_updated"</span>: <span class="s">"2026-05-19T16:00:00Z"</span>
+  }],
+  <span class="k">"summary"</span>: {
+    <span class="k">"ambulances"</span>: { <span class="k">"total"</span>: <span class="n">8</span>, <span class="k">"available"</span>: <span class="n">5</span>, <span class="k">"deployed"</span>: <span class="n">3</span> },
+    <span class="k">"police_units"</span>: { <span class="k">"total"</span>: <span class="n">12</span>, <span class="k">"available"</span>: <span class="n">7</span>, <span class="k">"deployed"</span>: <span class="n">5</span> },
+    <span class="k">"rescue_teams"</span>: { <span class="k">"total"</span>: <span class="n">4</span>, <span class="k">"available"</span>: <span class="n">2</span>, <span class="k">"deployed"</span>: <span class="n">2</span> },
+    <span class="k">"shelters"</span>: { <span class="k">"total"</span>: <span class="n">3</span>, <span class="k">"available"</span>: <span class="n">3</span>, <span class="k">"deployed"</span>: <span class="n">0</span> },
+    <span class="k">"generators"</span>: { <span class="k">"total"</span>: <span class="n">6</span>, <span class="k">"available"</span>: <span class="n">4</span>, <span class="k">"deployed"</span>: <span class="n">2</span> },
+    <span class="k">"water_tankers"</span>: { <span class="k">"total"</span>: <span class="n">4</span>, <span class="k">"available"</span>: <span class="n">3</span>, <span class="k">"deployed"</span>: <span class="n">1</span> },
+    <span class="k">"drones"</span>: { <span class="k">"total"</span>: <span class="n">3</span>, <span class="k">"available"</span>: <span class="n">2</span>, <span class="k">"deployed"</span>: <span class="n">1</span> }
+  }
+}</pre></div>
+  </div>
+
+  <div class="endpoint">
+    <div class="ep-header">
+      <span class="code-method method-get">GET</span>
+      <span class="ep-path">/resources/allocation</span>
+      <span style="font-size:12px;color:var(--muted)">Current allocation plan from last optimizer run</span>
+    </div>
+    <div class="code-block"><div class="code-bar"><span>Response 200</span></div>
+<pre>{
+  <span class="k">"plan_id"</span>: <span class="s">"alloc_plan_042"</span>,
+  <span class="k">"generated_at"</span>: <span class="s">"2026-05-19T16:35:00Z"</span>,
+  <span class="k">"active_crises_considered"</span>: <span class="n">2</span>,
+  <span class="k">"assignments"</span>: [{
+    <span class="k">"crisis_id"</span>: <span class="s">"crs_g10flood_001"</span>,
+    <span class="k">"crisis_type"</span>: <span class="s">"urban_flooding"</span>,
+    <span class="k">"severity"</span>: <span class="n">4</span>,
+    <span class="k">"resources_assigned"</span>: [
+      { <span class="k">"id"</span>: <span class="s">"res_amb_01"</span>, <span class="k">"type"</span>: <span class="s">"ambulance"</span>, <span class="k">"eta_min"</span>: <span class="n">8</span> },
+      { <span class="k">"id"</span>: <span class="s">"res_pol_03"</span>, <span class="k">"type"</span>: <span class="s">"police_unit"</span>, <span class="k">"eta_min"</span>: <span class="n">5</span> },
+      { <span class="k">"id"</span>: <span class="s">"res_rsc_01"</span>, <span class="k">"type"</span>: <span class="s">"rescue_team"</span>, <span class="k">"eta_min"</span>: <span class="n">12</span> }
+    ]
+  }],
+  <span class="k">"trade_offs"</span>: <span class="s">"Police unit 04 held back from heat emergency (severity 2) and sent to flooding (severity 4). Heat emergency receives medical outreach team only."</span>,
+  <span class="k">"optimizer_reasoning"</span>: <span class="s">"G-10 flooding ranked priority 1 (score 87) vs heat emergency (score 62) based on severity × affected_population × resource_marginal_impact"</span>
+}</pre></div>
+  </div>
+
+  <div class="endpoint">
+    <div class="ep-header">
+      <span class="code-method method-post">POST</span>
+      <span class="ep-path">/resources/optimize</span>
+      <span style="font-size:12px;color:var(--muted)">Trigger re-optimization (manual override)</span>
+    </div>
+    <div class="g2">
+      <div class="code-block"><div class="code-bar"><span>Request</span></div>
+<pre>{
+  <span class="k">"crisis_ids"</span>: [<span class="s">"crs_001"</span>, <span class="s">"crs_002"</span>],
+  <span class="k">"force"</span>: <span class="v">true</span>
+}</pre></div>
+      <div class="code-block"><div class="code-bar"><span>Response 202</span></div>
+<pre>{
+  <span class="k">"status"</span>: <span class="s">"optimization_triggered"</span>,
+  <span class="k">"task_id"</span>: <span class="s">"task_celery_xyz"</span>,
+  <span class="k">"estimated_completion_sec"</span>: <span class="n">8</span>
+}</pre></div>
+    </div>
+  </div>
+
+  <!-- SIGNALS -->
+  <div class="sub-h">Signals</div>
+
+  <div class="endpoint">
+    <div class="ep-header">
+      <span class="code-method method-get">GET</span>
+      <span class="ep-path">/signals?platform=twitter&amp;limit=50&amp;since=2026-05-19T16:00:00Z</span>
+    </div>
+    <div class="code-block"><div class="code-bar"><span>Response 200</span></div>
+<pre>{
+  <span class="k">"signals"</span>: [{
+    <span class="k">"id"</span>: <span class="s">"sig_tw_001"</span>,
+    <span class="k">"source_type"</span>: <span class="s">"social"</span>,
+    <span class="k">"platform"</span>: <span class="s">"twitter"</span>,
+    <span class="k">"raw_text"</span>: <span class="s">"massive flooding in g10 islamabad, cars floating #islamabadfloods"</span>,
+    <span class="k">"location"</span>: { <span class="k">"lat"</span>: <span class="n">33.721</span>, <span class="k">"lng"</span>: <span class="n">73.043</span>, <span class="k">"confidence"</span>: <span class="n">0.82</span> },
+    <span class="k">"timestamp"</span>: <span class="s">"2026-05-19T16:29:00Z"</span>,
+    <span class="k">"credibility_score"</span>: <span class="n">0.72</span>,
+    <span class="k">"urgency_score"</span>: <span class="n">0.91</span>,
+    <span class="k">"mention_velocity"</span>: <span class="n">47</span>,
+    <span class="k">"contradiction_flag"</span>: <span class="v">false</span>,
+    <span class="k">"signal_type"</span>: <span class="s">"urban_flooding"</span>,
+    <span class="k">"crisis_id"</span>: <span class="s">"crs_g10flood_001"</span>
+  }],
+  <span class="k">"total"</span>: <span class="n">89</span>
+}</pre></div>
+  </div>
+
+  <div class="endpoint">
+    <div class="ep-header">
+      <span class="code-method method-post">POST</span>
+      <span class="ep-path">/signals/inject</span>
+      <span style="font-size:12px;color:var(--muted)">Demo only — inject a mock signal to trigger the pipeline</span>
+    </div>
+    <div class="g2">
+      <div class="code-block"><div class="code-bar"><span>Request</span></div>
+<pre>{
+  <span class="k">"source_type"</span>: <span class="s">"social"</span>,
+  <span class="k">"platform"</span>: <span class="s">"telegram"</span>,
+  <span class="k">"raw_text"</span>: <span class="s">"fire in sector F-7/2, smoke visible"</span>,
+  <span class="k">"location"</span>: { <span class="k">"lat"</span>: <span class="n">33.736</span>, <span class="k">"lng"</span>: <span class="n">73.068</span> },
+  <span class="k">"signal_type"</span>: <span class="s">"infrastructure_failure"</span>,
+  <span class="k">"credibility_override"</span>: <span class="n">0.85</span>
+}</pre></div>
+      <div class="code-block"><div class="code-bar"><span>Response 202</span></div>
+<pre>{
+  <span class="k">"signal_id"</span>: <span class="s">"sig_mock_001"</span>,
+  <span class="k">"status"</span>: <span class="s">"injected"</span>,
+  <span class="k">"message"</span>: <span class="s">"Signal injected. LangGraph processing."</span>,
+  <span class="k">"processing_trace_id"</span>: <span class="s">"trc_new_process"</span>
+}</pre></div>
+    </div>
+  </div>
+
+  <!-- ALERTS -->
+  <div class="sub-h">Alerts &amp; notifications</div>
+
+  <div class="endpoint">
+    <div class="ep-header">
+      <span class="code-method method-get">GET</span>
+      <span class="ep-path">/alerts?crisis_id=crs_001&amp;audience=public</span>
+    </div>
+    <div class="code-block"><div class="code-bar"><span>Response 200</span></div>
+<pre>{
+  <span class="k">"alerts"</span>: [{
+    <span class="k">"id"</span>: <span class="s">"alrt_001"</span>,
+    <span class="k">"crisis_id"</span>: <span class="s">"crs_g10flood_001"</span>,
+    <span class="k">"target_audience"</span>: <span class="s">"public"</span>,
+    <span class="k">"message"</span>: <span class="s">"ALERT: Flooding in G-10. Avoid Shah Allah Ditta Road. Move to higher ground. Helpline: 1122"</span>,
+    <span class="k">"channel"</span>: <span class="s">"fcm"</span>,
+    <span class="k">"status"</span>: <span class="s">"sent"</span>,
+    <span class="k">"sent_at"</span>: <span class="s">"2026-05-19T16:33:00Z"</span>,
+    <span class="k">"retracted_at"</span>: <span class="v">null</span>,
+    <span class="k">"retraction_reason"</span>: <span class="v">null</span>
+  }, {
+    <span class="k">"id"</span>: <span class="s">"alrt_002"</span>,
+    <span class="k">"target_audience"</span>: <span class="s">"emergency_services"</span>,
+    <span class="k">"message"</span>: <span class="s">"DISPATCH: 3 units to G-10. Coordinates: 33.721, 73.043. Severity 4. ETA target: 8 min."</span>,
+    <span class="k">"channel"</span>: <span class="s">"sms"</span>,
+    <span class="k">"status"</span>: <span class="s">"sent"</span>
+  }]
+}</pre></div>
+  </div>
+
+  <!-- TRACES -->
+  <div class="sub-h">Antigravity traces</div>
+
+  <div class="endpoint">
+    <div class="ep-header">
+      <span class="code-method method-get">GET</span>
+      <span class="ep-path">/traces/{trace_id}</span>
+    </div>
+    <div class="code-block"><div class="code-bar"><span>Response 200 — full Antigravity trace</span></div>
+<pre>{
+  <span class="k">"trace_id"</span>: <span class="s">"trc_xyz789"</span>,
+  <span class="k">"crisis_id"</span>: <span class="s">"crs_g10flood_001"</span>,
+  <span class="k">"timestamp"</span>: <span class="s">"2026-05-19T16:32:00Z"</span>,
+  <span class="k">"workplan"</span>: [
+    <span class="s">"Step 1: Signal Fusion Agent — fuse 14 incoming signals"</span>,
+    <span class="s">"Step 2: Crisis Detection Agent — classify type + location"</span>,
+    <span class="s">"Step 3: Severity Prediction Agent — estimate impact"</span>,
+    <span class="s">"Step 4: Resource Optimizer Agent — allocate across 2 crises"</span>,
+    <span class="s">"Step 5: Simulation Agent — model all response actions"</span>,
+    <span class="s">"Step 6: Notification Agent — dispatch 6 stakeholder messages"</span>
+  ],
+  <span class="k">"steps"</span>: [{
+    <span class="k">"step_id"</span>: <span class="s">"step_1"</span>,
+    <span class="k">"agent_name"</span>: <span class="s">"SignalFusionAgent"</span>,
+    <span class="k">"framework"</span>: <span class="s">"LangGraph"</span>,
+    <span class="k">"input"</span>: { <span class="k">"signal_count"</span>: <span class="n">14</span>, <span class="k">"sources"</span>: [<span class="s">"twitter"</span>,<span class="s">"telegram"</span>,<span class="s">"weather"</span>,<span class="s">"traffic"</span>] },
+    <span class="k">"observations"</span>: <span class="s">"11 social signals cluster around G-10. 1 weather alert (heavy rain). 1 traffic spike. 1 field report conflict (water main)."</span>,
+    <span class="k">"reasoning"</span>: <span class="s">"Social velocity = 47 mentions/min (threshold: 20). Weather confirms rain. Traffic confirms congestion. Field report contradicts flood hypothesis. Flagging conflict."</span>,
+    <span class="k">"output"</span>: { <span class="k">"incident_candidates"</span>: <span class="n">1</span>, <span class="k">"flagged_conflicts"</span>: [<span class="s">"water_main_burst"</span>] },
+    <span class="k">"tool_calls"</span>: [],
+    <span class="k">"duration_ms"</span>: <span class="n">1240</span>,
+    <span class="k">"status"</span>: <span class="s">"completed"</span>
+  }],
+  <span class="k">"final_outcome"</span>: <span class="s">"Crisis detected and responded to. 6 notifications sent. 1 conflict flagged for verification."</span>
+}</pre></div>
+  </div>
+
+  <!-- WEBSOCKET -->
+  <div class="sub-h">WebSocket events</div>
+
+  <div class="endpoint">
+    <div class="ep-header">
+      <span class="code-method method-ws">WS</span>
+      <span class="ep-path">/ws/feed</span>
+      <span style="font-size:12px;color:var(--muted)">Real-time event stream — connect with JWT token as query param</span>
+    </div>
+    <div class="code-block"><div class="code-bar"><span>Server → Client events (JSON messages)</span></div>
+<pre><span class="c">// New crisis detected</span>
+{ <span class="k">"type"</span>: <span class="s">"crisis_detected"</span>, <span class="k">"data"</span>: { <span class="c">/* crisis object */</span> } }
+
+<span class="c">// Crisis severity/classification updated</span>
+{ <span class="k">"type"</span>: <span class="s">"crisis_updated"</span>, <span class="k">"data"</span>: { <span class="k">"id"</span>: <span class="s">"crs_001"</span>, <span class="k">"severity_level"</span>: <span class="n">5</span>, <span class="c">/* ... */</span> } }
+
+<span class="c">// Resource allocation plan updated</span>
+{ <span class="k">"type"</span>: <span class="s">"allocation_updated"</span>, <span class="k">"data"</span>: { <span class="c">/* allocation plan */</span> } }
+
+<span class="c">// Alert sent to a stakeholder group</span>
+{ <span class="k">"type"</span>: <span class="s">"alert_sent"</span>, <span class="k">"data"</span>: { <span class="k">"crisis_id"</span>: <span class="s">"crs_001"</span>, <span class="k">"audience"</span>: <span class="s">"public"</span>, <span class="k">"channel"</span>: <span class="s">"fcm"</span> } }
+
+<span class="c">// Alert retracted</span>
+{ <span class="k">"type"</span>: <span class="s">"alert_retracted"</span>, <span class="k">"data"</span>: { <span class="k">"alert_id"</span>: <span class="s">"alrt_001"</span>, <span class="k">"reason"</span>: <span class="s">"false_alarm"</span> } }
+
+<span class="c">// New signal received</span>
+{ <span class="k">"type"</span>: <span class="s">"signal_received"</span>, <span class="k">"data"</span>: { <span class="c">/* signal object */</span> } }
+
+<span class="c">// LangGraph agent step completed</span>
+{ <span class="k">"type"</span>: <span class="s">"agent_step"</span>, <span class="k">"data"</span>: {
+  <span class="k">"agent"</span>: <span class="s">"CrisisDetectionAgent"</span>,
+  <span class="k">"step"</span>: <span class="s">"classify_type"</span>,
+  <span class="k">"result"</span>: <span class="s">"urban_flooding"</span>,
+  <span class="k">"confidence"</span>: <span class="n">0.87</span>
+}}
+
+<span class="c">// Antigravity trace step added</span>
+{ <span class="k">"type"</span>: <span class="s">"trace_step"</span>, <span class="k">"data"</span>: { <span class="k">"trace_id"</span>: <span class="s">"trc_001"</span>, <span class="k">"step_id"</span>: <span class="s">"step_2"</span>, <span class="c">/* step data */</span> } }
+
+<span class="c">// Heartbeat (every 30s)</span>
+{ <span class="k">"type"</span>: <span class="s">"ping"</span>, <span class="k">"data"</span>: { <span class="k">"timestamp"</span>: <span class="s">"2026-05-19T16:45:30Z"</span> } }</pre></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════ DATABASE ══════════════════════════ -->
+<section class="section" id="database">
+  <div class="sec-hd">
+    <div class="sec-eyebrow ey-db">Database design</div>
+    <div class="sec-title">PostgreSQL + Firestore + Redis</div>
+    <div class="sec-desc">Three databases, each serving a specific access pattern. PostgreSQL for ACID history. Firestore for real-time Flutter sync. Redis for caching and broker.</div>
+  </div>
+
+  <div class="sub-h">PostgreSQL tables</div>
+
+  <div class="schema-table">
+    <div class="schema-title"><span class="badge b-db">TABLE</span> crisis_events</div>
+    <table class="tbl">
+      <tr><th>Column</th><th>Type</th><th>Notes</th></tr>
+      <tr><td>id</td><td>VARCHAR(32) PK</td><td>crs_{nanoid}</td></tr>
+      <tr><td>type</td><td>VARCHAR(50)</td><td>urban_flooding | heatwave | accident | infrastructure | power_outage | disorder | disease_cluster</td></tr>
+      <tr><td>status</td><td>VARCHAR(20)</td><td>active | resolved | false_alarm | retracted</td></tr>
+      <tr><td>severity_level</td><td>INTEGER</td><td>1–5</td></tr>
+      <tr><td>confidence_score</td><td>FLOAT</td><td>0.0–1.0</td></tr>
+      <tr><td>location_lat</td><td>FLOAT</td><td></td></tr>
+      <tr><td>location_lng</td><td>FLOAT</td><td></td></tr>
+      <tr><td>area_name</td><td>VARCHAR(200)</td><td></td></tr>
+      <tr><td>zone</td><td>VARCHAR(50)</td><td>G-10, F-7, etc.</td></tr>
+      <tr><td>affected_radius_km</td><td>FLOAT</td><td></td></tr>
+      <tr><td>affected_population</td><td>INTEGER</td><td></td></tr>
+      <tr><td>description</td><td>TEXT</td><td></td></tr>
+      <tr><td>predicted_duration_hours</td><td>FLOAT</td><td></td></tr>
+      <tr><td>peak_impact_time</td><td>TIMESTAMPTZ</td><td></td></tr>
+      <tr><td>spread_risk</td><td>VARCHAR(20)</td><td>low | medium | high | critical</td></tr>
+      <tr><td>uncertainty_min_hours</td><td>FLOAT</td><td></td></tr>
+      <tr><td>uncertainty_max_hours</td><td>FLOAT</td><td></td></tr>
+      <tr><td>conflicting_hypotheses</td><td>JSONB</td><td>array of strings</td></tr>
+      <tr><td>trace_id</td><td>VARCHAR(32)</td><td>FK → antigravity_traces</td></tr>
+      <tr><td>created_at</td><td>TIMESTAMPTZ</td><td>DEFAULT NOW()</td></tr>
+      <tr><td>updated_at</td><td>TIMESTAMPTZ</td><td>auto-updated</td></tr>
+      <tr><td>resolved_at</td><td>TIMESTAMPTZ</td><td>nullable</td></tr>
+    </table>
+  </div>
+
+  <div class="schema-table">
+    <div class="schema-title"><span class="badge b-db">TABLE</span> crisis_signals</div>
+    <table class="tbl">
+      <tr><th>Column</th><th>Type</th><th>Notes</th></tr>
+      <tr><td>id</td><td>VARCHAR(32) PK</td><td></td></tr>
+      <tr><td>crisis_id</td><td>VARCHAR(32)</td><td>FK → crisis_events, nullable</td></tr>
+      <tr><td>source_type</td><td>VARCHAR(30)</td><td>social | weather | traffic | sensor | news | infrastructure</td></tr>
+      <tr><td>platform</td><td>VARCHAR(30)</td><td>twitter | telegram | reddit | facebook | mastodon | openweathermap | tomtom | mqtt</td></tr>
+      <tr><td>raw_text</td><td>TEXT</td><td></td></tr>
+      <tr><td>location_lat</td><td>FLOAT</td><td>nullable</td></tr>
+      <tr><td>location_lng</td><td>FLOAT</td><td>nullable</td></tr>
+      <tr><td>location_confidence</td><td>FLOAT</td><td>0.0–1.0</td></tr>
+      <tr><td>credibility_score</td><td>FLOAT</td><td>0.0–1.0, computed by LangGraph</td></tr>
+      <tr><td>urgency_score</td><td>FLOAT</td><td>0.0–1.0</td></tr>
+      <tr><td>mention_velocity</td><td>INTEGER</td><td>mentions per minute</td></tr>
+      <tr><td>contradiction_flag</td><td>BOOLEAN</td><td>DEFAULT FALSE</td></tr>
+      <tr><td>signal_type</td><td>VARCHAR(50)</td><td>classified type</td></tr>
+      <tr><td>metadata</td><td>JSONB</td><td>platform-specific extras</td></tr>
+      <tr><td>timestamp</td><td>TIMESTAMPTZ</td><td>original signal time</td></tr>
+    </table>
+  </div>
+
+  <div class="schema-table">
+    <div class="schema-title"><span class="badge b-db">TABLE</span> resources</div>
+    <table class="tbl">
+      <tr><th>Column</th><th>Type</th><th>Notes</th></tr>
+      <tr><td>id</td><td>VARCHAR(32) PK</td><td></td></tr>
+      <tr><td>type</td><td>VARCHAR(40)</td><td>ambulance | police_unit | rescue_team | shelter | generator | water_tanker | field_team | drone</td></tr>
+      <tr><td>name</td><td>VARCHAR(100)</td><td>e.g. "Ambulance Unit 3"</td></tr>
+      <tr><td>status</td><td>VARCHAR(20)</td><td>available | deployed | maintenance | offline</td></tr>
+      <tr><td>home_lat</td><td>FLOAT</td><td>base location</td></tr>
+      <tr><td>home_lng</td><td>FLOAT</td><td></td></tr>
+      <tr><td>current_lat</td><td>FLOAT</td><td>nullable</td></tr>
+      <tr><td>current_lng</td><td>FLOAT</td><td>nullable</td></tr>
+      <tr><td>current_crisis_id</td><td>VARCHAR(32)</td><td>FK → crisis_events, nullable</td></tr>
+      <tr><td>contact_info</td><td>JSONB</td><td>phone, radio, etc.</td></tr>
+      <tr><td>last_updated</td><td>TIMESTAMPTZ</td><td></td></tr>
+    </table>
+  </div>
+
+  <div class="schema-table">
+    <div class="schema-title"><span class="badge b-db">TABLE</span> notification_log</div>
+    <table class="tbl">
+      <tr><th>Column</th><th>Type</th><th>Notes</th></tr>
+      <tr><td>id</td><td>VARCHAR(32) PK</td><td></td></tr>
+      <tr><td>crisis_id</td><td>VARCHAR(32)</td><td>FK</td></tr>
+      <tr><td>target_audience</td><td>VARCHAR(40)</td><td>public | emergency_services | hospitals | utilities | transport | command_center</td></tr>
+      <tr><td>message</td><td>TEXT</td><td>generated by LangGraph Notification Agent</td></tr>
+      <tr><td>channel</td><td>VARCHAR(20)</td><td>fcm | sms | email | web_push</td></tr>
+      <tr><td>status</td><td>VARCHAR(20)</td><td>sent | failed | retracted | pending</td></tr>
+      <tr><td>sent_at</td><td>TIMESTAMPTZ</td><td></td></tr>
+      <tr><td>retracted_at</td><td>TIMESTAMPTZ</td><td>nullable</td></tr>
+      <tr><td>retraction_reason</td><td>TEXT</td><td>nullable</td></tr>
+    </table>
+  </div>
+
+  <div class="schema-table">
+    <div class="schema-title"><span class="badge b-db">TABLE</span> antigravity_traces</div>
+    <table class="tbl">
+      <tr><th>Column</th><th>Type</th><th>Notes</th></tr>
+      <tr><td>id</td><td>VARCHAR(32) PK</td><td></td></tr>
+      <tr><td>crisis_id</td><td>VARCHAR(32)</td><td>FK</td></tr>
+      <tr><td>trace_json_url</td><td>TEXT</td><td>Google Cloud Storage URL for full trace JSON</td></tr>
+      <tr><td>workplan_summary</td><td>JSONB</td><td>step names and descriptions</td></tr>
+      <tr><td>agents_invoked</td><td>JSONB</td><td>array of agent names</td></tr>
+      <tr><td>total_duration_ms</td><td>INTEGER</td><td></td></tr>
+      <tr><td>status</td><td>VARCHAR(20)</td><td>completed | failed | partial</td></tr>
+      <tr><td>created_at</td><td>TIMESTAMPTZ</td><td></td></tr>
+    </table>
+  </div>
+
+  <div class="sub-h">Firestore document structure</div>
+  <div class="code-block">
+    <div class="code-bar"><span>Firestore collections (real-time sync to Flutter + Next.js)</span></div>
+    <pre><span class="c">// active_crises/{crisis_id}</span>
+{
+  id, type, status, severity_level, confidence_score,
+  location: { lat, lng, area_name, zone },
+  affected_radius_km, affected_population,
+  resources_assigned: [{ id, type, eta_minutes }],
+  current_agent_step: <span class="s">"ResourceOptimizerAgent"</span>,
+  last_agent_activity: <span class="s">"Allocating 3 units to G-10..."</span>,
+  updated_at: serverTimestamp()
+}
+
+<span class="c">// resource_state/{resource_id}  — live resource position</span>
+{ id, type, name, status, current_lat, current_lng, current_crisis_id, last_updated }
+
+<span class="c">// agent_activity/{session_id}  — live agent feed for trace viewer</span>
+{ agent_name, step, input_summary, output_summary, reasoning_excerpt, timestamp }
+
+<span class="c">// active_alerts/{alert_id}  — active alerts for notification feed</span>
+{ crisis_id, audience, message, channel, status, sent_at }</pre>
+  </div>
+
+  <div class="sub-h">Redis key patterns</div>
+  <table class="tbl">
+    <tr><th>Key pattern</th><th>Value</th><th>TTL</th><th>Purpose</th></tr>
+    <tr><td>signal:cache:{platform}:{zone}</td><td>JSON signal</td><td>10 min</td><td>Last-known signal for degraded mode</td></tr>
+    <tr><td>crisis:summary:{id}</td><td>JSON crisis</td><td>60s</td><td>API response cache</td></tr>
+    <tr><td>resources:available</td><td>JSON list</td><td>30s</td><td>Resource inventory cache</td></tr>
+    <tr><td>ratelimit:{api}:{minute}</td><td>Integer</td><td>60s</td><td>API call rate limiting</td></tr>
+    <tr><td>ws:clients:{client_id}</td><td>JSON</td><td>30 min</td><td>Active WebSocket sessions</td></tr>
+    <tr><td>celery:task:{task_id}</td><td>JSON</td><td>24h</td><td>Celery task results</td></tr>
+  </table>
+</section>
+
+<!-- ══════════════════════════ LANGGRAPH ══════════════════════════ -->
+<section class="section" id="langgraph">
+  <div class="sec-hd">
+    <div class="sec-eyebrow ey-lg">Intelligence layer</div>
+    <div class="sec-title">LangGraph agents inside Antigravity</div>
+    <div class="sec-desc">Six LangGraph StateGraphs, each wrapped as an Antigravity tool. Every node calls Gemini. Conditional edges handle low-confidence and contradiction scenarios.</div>
+  </div>
+
+  <div class="g2" style="margin-bottom:16px">
+    <div class="card c-lg">
+      <div class="card-title">Agent 1 — Signal Fusion</div>
+      <div class="card-body">Groups 14+ signals into incident candidates. Scores credibility on 5 dimensions. Flags contradictions. Low-confidence clusters go to verify queue, not to detection.</div>
+      <div class="agent-graph">
+        <span class="ag-node start">ingest batch</span><span class="ag-arr">→</span>
+        <span class="ag-node">score 5 dims</span><span class="ag-arr">→</span>
+        <span class="ag-node">group incidents</span><span class="ag-arr">→</span>
+        <span class="ag-node cond">confidence ≥ 0.6?</span><span class="ag-arr">→</span>
+        <span class="ag-node end">output cluster</span>
+        <span class="ag-break"></span>
+        <span style="padding:4px 0 0 8px;font-size:10px;color:var(--fr)">no →</span>
+        <span class="ag-arr"> </span><span class="ag-node loop">verify queue</span>
+      </div>
+    </div>
+    <div class="card c-lg">
+      <div class="card-title">Agent 2 — Crisis Detection</div>
+      <div class="card-body">Classifies type, geocodes location, computes confidence score. Conflict branch: if field report contradicts classification, branches to hypothesis resolution.</div>
+      <div class="agent-graph">
+        <span class="ag-node start">receive cluster</span><span class="ag-arr">→</span>
+        <span class="ag-node">classify (Gemini)</span><span class="ag-arr">→</span>
+        <span class="ag-node">geocode</span><span class="ag-arr">→</span>
+        <span class="ag-node cond">conflict?</span><span class="ag-arr">→</span>
+        <span class="ag-node end">output classification</span>
+        <span class="ag-break"></span>
+        <span style="padding:4px 0 0 8px;font-size:10px;color:var(--fr)">yes →</span>
+        <span class="ag-arr"> </span><span class="ag-node loop">flag + hold</span>
+      </div>
+    </div>
+    <div class="card c-lg">
+      <div class="card-title">Agent 3 — Severity Prediction</div>
+      <div class="card-body">Pulls live weather, historical data. Estimates radius, population, duration, peak time, spread risk, uncertainty range using Gemini Pro multi-step reasoning.</div>
+      <div class="agent-graph">
+        <span class="ag-node start">classification in</span><span class="ag-arr">→</span>
+        <span class="ag-node">load history</span><span class="ag-arr">→</span>
+        <span class="ag-node">fetch weather</span><span class="ag-arr">→</span>
+        <span class="ag-node">estimate all fields</span><span class="ag-arr">→</span>
+        <span class="ag-node end">severity profile</span>
+      </div>
+    </div>
+    <div class="card c-lg">
+      <div class="card-title">Agent 4 — Resource Optimizer</div>
+      <div class="card-body">Reads all active crisis severities + resource inventory. Runs optimization. Assigns resources with explicit trade-off reasoning. Handles simultaneous crises competition.</div>
+      <div class="agent-graph">
+        <span class="ag-node start">all crises in</span><span class="ag-arr">→</span>
+        <span class="ag-node">inventory check</span><span class="ag-arr">→</span>
+        <span class="ag-node">rank by impact</span><span class="ag-arr">→</span>
+        <span class="ag-node">optimize + trade-offs</span><span class="ag-arr">→</span>
+        <span class="ag-node end">allocation plan</span>
+      </div>
+    </div>
+    <div class="card c-lg">
+      <div class="card-title">Agent 5 — Simulation</div>
+      <div class="card-body">Loops over each planned action. Models before/after state. Detects critical side effects (e.g., evacuation alert → congestion). Flags re-plan if needed.</div>
+      <div class="agent-graph">
+        <span class="ag-node start">plan in</span><span class="ag-arr">→</span>
+        <span class="ag-node loop">for each action</span><span class="ag-arr">→</span>
+        <span class="ag-node">simulate</span><span class="ag-arr">→</span>
+        <span class="ag-node cond">side effect?</span><span class="ag-arr">→</span>
+        <span class="ag-node end">simulation report</span>
+        <span class="ag-break"></span>
+        <span style="padding:4px 0 0 8px;font-size:10px;color:var(--fr)">critical →</span>
+        <span class="ag-arr"> </span><span class="ag-node loop">replan flag</span>
+      </div>
+    </div>
+    <div class="card c-lg">
+      <div class="card-title">Agent 6 — Notification</div>
+      <div class="card-body">Generates 6 tailored messages in parallel. Handles staged alerting. Retraction sub-graph sends correction to all audiences. All messages via Kafka notifications topic → Celery.</div>
+      <div class="agent-graph">
+        <span class="ag-node start">crisis summary</span><span class="ag-arr">→</span>
+        <span class="ag-node cond">retraction?</span><span class="ag-arr">→</span>
+        <span class="ag-node">gen 6 msgs (Gemini Flash)</span><span class="ag-arr">→</span>
+        <span class="ag-node">stage (public first)</span><span class="ag-arr">→</span>
+        <span class="ag-node end">dispatch + log</span>
+        <span class="ag-break"></span>
+        <span style="padding:4px 0 0 8px;font-size:10px;color:var(--fr)">yes →</span>
+        <span class="ag-arr"> </span><span class="ag-node loop">correction sub-graph</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub-h">Wrapping LangGraph inside Antigravity</div>
+  <div class="code-block">
+    <div class="code-bar"><span>agents/orchestrator.py — Antigravity wrapper</span></div>
+    <pre><span class="k">from</span> google.antigravity <span class="k">import</span> AntigravityClient, AgentTool
+<span class="k">from</span> agents.signal_fusion <span class="k">import</span> run_signal_fusion_graph
+<span class="k">from</span> agents.crisis_detection <span class="k">import</span> run_crisis_detection_graph
+
+client = AntigravityClient()
+
+<span class="c"># Register LangGraph agents as Antigravity tools</span>
+signal_fusion_tool = AgentTool(
+    name=<span class="s">"SignalFusionAgent"</span>,
+    description=<span class="s">"Groups and scores incoming signals into crisis candidates"</span>,
+    func=run_signal_fusion_graph,  <span class="c"># LangGraph graph runner</span>
+)
+
+<span class="k">async def</span> process_crisis_cycle(signals: list) -> dict:
+    <span class="c"># Antigravity orchestrates the full cycle, generating traces</span>
+    result = <span class="k">await</span> client.run_workflow(
+        workplan=[
+            { <span class="k">"step"</span>: <span class="s">"signal_fusion"</span>, <span class="k">"tool"</span>: signal_fusion_tool, <span class="k">"input"</span>: signals },
+            { <span class="k">"step"</span>: <span class="s">"crisis_detection"</span>, <span class="k">"tool"</span>: crisis_detection_tool },
+            { <span class="k">"step"</span>: <span class="s">"severity_prediction"</span>, <span class="k">"tool"</span>: severity_tool },
+            { <span class="k">"step"</span>: <span class="s">"resource_optimization"</span>, <span class="k">"tool"</span>: optimizer_tool },
+            { <span class="k">"step"</span>: <span class="s">"simulation"</span>, <span class="k">"tool"</span>: simulation_tool },
+            { <span class="k">"step"</span>: <span class="s">"notification"</span>, <span class="k">"tool"</span>: notification_tool },
+        ],
+        trace_config={ <span class="k">"save_traces"</span>: <span class="v">True</span>, <span class="k">"export_to"</span>: <span class="s">"gcs://ciro-traces/"</span> }
+    )
+    <span class="k">return</span> result.trace_id, result.output</pre>
+  </div>
+</section>
+
+<!-- ══════════════════════════ FREE APIS ══════════════════════════ -->
+<section class="section" id="free-apis">
+  <div class="sec-hd">
+    <div class="sec-eyebrow ey-gr">External APIs · free tiers</div>
+    <div class="sec-title">All free APIs for CIRO</div>
+    <div class="sec-desc">Every external API recommended for CIRO with free tier limits, auth method, and setup complexity. All confirmed free as of 2026.</div>
+  </div>
+
+  <div class="sub-h">Social media signals</div>
+  <table class="api-table">
+    <tr><th>API</th><th>Free tier</th><th>Auth</th><th>Python lib</th><th>CIRO use</th></tr>
+    <tr>
+      <td><strong>Twitter/X API v2</strong></td>
+      <td><span class="free-partial">500k tweets/month (Basic $100/mo for filtered stream)</span></td>
+      <td>Bearer token</td>
+      <td><code>tweepy</code></td>
+      <td>Search recent tweets by keyword + geotag. Most direct public signal source.</td>
+    </tr>
+    <tr>
+      <td><strong>Reddit API (PRAW)</strong></td>
+      <td><span class="free-yes">Free — 60 req/min</span></td>
+      <td>OAuth2 (app credentials)</td>
+      <td><code>praw</code></td>
+      <td>Search r/pakistan, r/islamabad, r/rawalpindi for crisis posts. No approval needed.</td>
+    </tr>
+    <tr>
+      <td><strong>Telegram Bot API</strong></td>
+      <td><span class="free-yes">Free — unlimited</span></td>
+      <td>Bot token</td>
+      <td><code>python-telegram-bot</code></td>
+      <td>Webhook on public channels. Best for Pakistan (Telegram usage is very high).</td>
+    </tr>
+    <tr>
+      <td><strong>Facebook Graph API</strong></td>
+      <td><span class="free-partial">Public pages only. Requires Facebook App approval for advanced features.</span></td>
+      <td>App token</td>
+      <td><code>facebook-sdk</code></td>
+      <td>Public page posts from local news, government pages. For demo: mock or use RSS of public pages.</td>
+    </tr>
+    <tr>
+      <td><strong>Mastodon API</strong></td>
+      <td><span class="free-yes">Free — no key needed for public timeline</span></td>
+      <td>None (public) or token</td>
+      <td><code>mastodon.py</code></td>
+      <td>Public timelines with hashtag search. Good X alternative for demo.</td>
+    </tr>
+    <tr>
+      <td><strong>Bluesky (AT Protocol)</strong></td>
+      <td><span class="free-yes">Free — public firehose access</span></td>
+      <td>App password</td>
+      <td><code>atproto</code></td>
+      <td>Search posts by keyword. Growing platform, good for diversifying signal sources.</td>
+    </tr>
+    <tr>
+      <td><strong>NewsAPI.org</strong></td>
+      <td><span class="free-partial">100 requests/day (free tier)</span></td>
+      <td>API key</td>
+      <td><code>newsapi-python</code></td>
+      <td>Local news monitoring. Higher credibility than social media.</td>
+    </tr>
+    <tr>
+      <td><strong>GDELT Project API</strong></td>
+      <td><span class="free-yes">Completely free — no key</span></td>
+      <td>None</td>
+      <td>HTTP requests</td>
+      <td>Massive news monitoring database. Good for event detection. Query by keyword + location.</td>
+    </tr>
+    <tr>
+      <td><strong>RSS feeds (News)</strong></td>
+      <td><span class="free-yes">Free — unlimited</span></td>
+      <td>None</td>
+      <td><code>feedparser</code></td>
+      <td>Geo News, Dawn, ARY News, Express Tribune RSS feeds for Pakistan. Highly reliable.</td>
+    </tr>
+  </table>
+
+  <div class="sub-h">Weather &amp; environmental</div>
+  <table class="api-table">
+    <tr><th>API</th><th>Free tier</th><th>Auth</th><th>Python lib</th><th>CIRO use</th></tr>
+    <tr>
+      <td><strong>Open-Meteo</strong></td>
+      <td><span class="free-yes">Completely free — 10,000 req/day, no key needed</span></td>
+      <td>None</td>
+      <td><code>openmeteo-requests</code></td>
+      <td>Current weather, hourly forecast, rainfall, temperature. BEST free option — no signup.</td>
+    </tr>
+    <tr>
+      <td><strong>OpenWeatherMap</strong></td>
+      <td><span class="free-yes">Free — 1,000 calls/day, 60/min</span></td>
+      <td>API key</td>
+      <td><code>pyowm</code></td>
+      <td>Current weather + alerts. Fallback when Open-Meteo is unavailable.</td>
+    </tr>
+    <tr>
+      <td><strong>WeatherAPI.com</strong></td>
+      <td><span class="free-yes">Free — 1M calls/month</span></td>
+      <td>API key</td>
+      <td>HTTP requests</td>
+      <td>Realtime + forecast + alerts. Good as third weather source for signal fusion.</td>
+    </tr>
+    <tr>
+      <td><strong>AQICN (Air Quality)</strong></td>
+      <td><span class="free-yes">Free — 1000 req/hour with key</span></td>
+      <td>Token</td>
+      <td>HTTP requests</td>
+      <td>Air quality index for disease/industrial crisis signals. Free, covers Pakistan cities.</td>
+    </tr>
+  </table>
+
+  <div class="sub-h">Maps, traffic &amp; geocoding</div>
+  <table class="api-table">
+    <tr><th>API</th><th>Free tier</th><th>Auth</th><th>Use</th></tr>
+    <tr>
+      <td><strong>OpenStreetMap / Nominatim</strong></td>
+      <td><span class="free-yes">Completely free — no key, rate limit: 1 req/sec</span></td>
+      <td>None</td>
+      <td>Geocoding (text → lat/lng). Reverse geocoding. Free forever.</td>
+    </tr>
+    <tr>
+      <td><strong>Google Maps Platform</strong></td>
+      <td><span class="free-partial">$200/month free credit = ~100k geocodes OR ~40k map loads</span></td>
+      <td>API key</td>
+      <td>Geocoding, traffic, directions. Best quality for Pakistan. Likely within free credit for hackathon.</td>
+    </tr>
+    <tr>
+      <td><strong>Mapbox</strong></td>
+      <td><span class="free-yes">Free — 50,000 map loads/month, 100k geocodes/month</span></td>
+      <td>Access token</td>
+      <td>Web map tiles for Next.js dashboard. Mapbox GL JS. Generous free tier.</td>
+    </tr>
+    <tr>
+      <td><strong>TomTom Traffic API</strong></td>
+      <td><span class="free-yes">Free — 2,500 requests/day</span></td>
+      <td>API key</td>
+      <td>Real-time traffic flow and incidents. Best free traffic API. Covers major Pakistan roads.</td>
+    </tr>
+    <tr>
+      <td><strong>HERE Traffic</strong></td>
+      <td><span class="free-yes">Free — 250k transactions/month</span></td>
+      <td>API key</td>
+      <td>Traffic incidents + routing. Good backup for TomTom. Also has geocoding.</td>
+    </tr>
+    <tr>
+      <td><strong>OpenCage Geocoding</strong></td>
+      <td><span class="free-yes">Free — 2,500 requests/day</span></td>
+      <td>API key</td>
+      <td>Geocoding backup. Good for converting "near G-10 Islamabad" to coordinates.</td>
+    </tr>
+    <tr>
+      <td><strong>Flutter Map (Leaflet)</strong></td>
+      <td><span class="free-yes">Completely free — uses OpenStreetMap tiles</span></td>
+      <td>None</td>
+      <td>Flutter map alternative to Google Maps. Zero cost, open-source. Good for demo.</td>
+    </tr>
+  </table>
+
+  <div class="sub-h">AI / LLM</div>
+  <table class="api-table">
+    <tr><th>API</th><th>Free tier</th><th>Notes</th></tr>
+    <tr>
+      <td><strong>Google Gemini API (AI Studio)</strong></td>
+      <td><span class="free-yes">Free — Gemini 1.5 Flash: 15 RPM, 1M TPM; Gemini 1.5 Pro: 2 RPM, 32k TPD</span></td>
+      <td>Use via AI Studio key. Rate limits sufficient for demo. Upgrade to paid if needed during submission.</td>
+    </tr>
+  </table>
+
+  <div class="note tip">Recommended combination: Open-Meteo (weather, free, no key) + Reddit PRAW (social, free) + Telegram Bot (social, free) + Nominatim (geocoding, free) + TomTom (traffic, 2500/day) + Gemini via AI Studio (free tier). This gets you a working CIRO with ZERO API costs.</div>
+</section>
+
+<!-- ══════════════════════════ ANTIGRAVITY TRACES ══════════════════════════ -->
+<section class="section" id="antigravity">
+  <div class="sec-hd">
+    <div class="sec-eyebrow ey-ag">Mandatory — 20% of score</div>
+    <div class="sec-title">Antigravity traces — how to generate &amp; show real ones</div>
+    <div class="sec-desc">The challenge requires REAL Antigravity traces showing agent reasoning, decisions, and tool calls. Here is exactly how to generate them, export them, and display them in your app.</div>
+  </div>
+
+  <div class="note warn">Antigravity traces must be REAL — generated by actually running your system through Google Antigravity. You cannot fake them. Judges will look for: workplan, observations, reasoning, decisions, tool calls, action execution, error recovery, final outcomes. All 8 must be present.</div>
+
+  <div class="sub-h">Step 1 — How to generate real traces</div>
+  <div class="flow-steps">
+    <div class="flow-step">
+      <span class="fs-num">01</span>
+      <div class="fs-content">
+        <div class="fs-title">Set up Google Antigravity client in Python</div>
+        <div class="fs-desc">Install the Antigravity SDK: <code>pip install google-antigravity</code>. Initialize with your Google Cloud credentials. Every call to <code>client.run_workflow()</code> automatically generates a trace with agent observations, reasoning, tool calls, and outcomes.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <span class="fs-num">02</span>
+      <div class="fs-content">
+        <div class="fs-title">Register your LangGraph agents as Antigravity tools</div>
+        <div class="fs-desc">Each LangGraph graph runner becomes an <code>AgentTool</code> in Antigravity. When Antigravity calls your LangGraph agent, it records: the input passed, the output returned, and the duration. The LangGraph internal reasoning (from Gemini) is passed back as the tool's "reasoning" field.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <span class="fs-num">03</span>
+      <div class="fs-content">
+        <div class="fs-title">Export trace to Cloud Storage after each crisis cycle</div>
+        <div class="fs-desc">Set <code>trace_config={"save_traces": True, "export_to": "gcs://your-bucket/traces/"}</code> when calling <code>run_workflow()</code>. Antigravity saves the complete JSON trace automatically. You then write the trace URL to your <code>antigravity_traces</code> PostgreSQL table.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <span class="fs-num">04</span>
+      <div class="fs-content">
+        <div class="fs-title">Display traces in real-time during demo</div>
+        <div class="fs-desc">Your WebSocket broadcasts a <code>trace_step</code> event every time Antigravity completes a step. Both Flutter and Next.js display the live trace in a "Trace Viewer" screen as the crisis is being processed. This is the most impressive demo moment — judges can see the agents thinking in real time.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub-h">What a real Antigravity trace looks like (JSON)</div>
+  <div class="trace-box">
+    <div class="trace-header">🔍 Antigravity trace — crisis crs_g10flood_001 — trc_xyz789</div>
+    <div class="trace-body"><span class="t-key">"trace_id"</span>: <span class="t-str">"trc_xyz789"</span>,
+<span class="t-key">"crisis_id"</span>: <span class="t-str">"crs_g10flood_001"</span>,
+<span class="t-key">"timestamp"</span>: <span class="t-str">"2026-05-19T16:32:00Z"</span>,
+<span class="t-key">"workplan"</span>: [                           <span class="t-comment">// Antigravity-generated plan</span>
+  <span class="t-str">"Step 1: Signal Fusion — fuse 14 signals from 4 sources"</span>,
+  <span class="t-str">"Step 2: Crisis Detection — classify type and location"</span>,
+  <span class="t-str">"Step 3: Severity Prediction — estimate impact + uncertainty"</span>,
+  <span class="t-str">"Step 4: Resource Optimizer — allocate across 2 simultaneous crises"</span>,
+  <span class="t-str">"Step 5: Simulation — model 4 response actions"</span>,
+  <span class="t-str">"Step 6: Notification — generate + dispatch 6 stakeholder messages"</span>
+],
+<span class="t-key">"steps"</span>: [
+  {
+    <span class="t-key">"step_id"</span>: <span class="t-str">"step_1"</span>, <span class="t-key">"agent_name"</span>: <span class="t-str">"SignalFusionAgent"</span>,
+    <span class="t-key">"framework"</span>: <span class="t-str">"LangGraph"</span>,
+    <span class="t-key">"input_summary"</span>: <span class="t-str">"14 signals: 11 social (Twitter/Telegram), 1 weather, 1 traffic, 1 field report"</span>,
+    <span class="t-key">"observations"</span>: <span class="t-str">"Social velocity = 47 mentions/min in G-10. Weather API confirms heavy rainfall (42mm/hr). Traffic spike on Shah Allah Ditta Road. Field report: water main burst hypothesis."</span>,
+    <span class="t-key">"reasoning"</span>: <span class="t-str">"11 social signals cluster around G-10 zone with confidence 0.91. Weather corroborates flooding scenario. Traffic corroborates access blockage. Field report contradicts main hypothesis — flagging as low-credibility conflict (single source, unverified)."</span>,
+    <span class="t-key">"decisions"</span>: [<span class="t-str">"Include 12 signals in cluster"</span>, <span class="t-str">"Flag water_main hypothesis as conflict"</span>, <span class="t-str">"Proceed with flooding as primary hypothesis"</span>],
+    <span class="t-key">"tool_calls"</span>: [],
+    <span class="t-key">"output"</span>: { <span class="t-key">"clusters"</span>: <span class="t-num">1</span>, <span class="t-key">"primary_type"</span>: <span class="t-str">"urban_flooding"</span>, <span class="t-key">"conflicts"</span>: [<span class="t-str">"water_main_burst"</span>] },
+    <span class="t-key">"duration_ms"</span>: <span class="t-num">1240</span>, <span class="t-key">"status"</span>: <span class="t-str">"completed"</span>
+  },
+  {
+    <span class="t-key">"step_id"</span>: <span class="t-str">"step_4"</span>, <span class="t-key">"agent_name"</span>: <span class="t-str">"ResourceOptimizerAgent"</span>,
+    <span class="t-key">"observations"</span>: <span class="t-str">"2 active crises: G-10 flood (severity 4, pop 8400) and heat emergency (severity 2, pop 1200). Available: 5 ambulances, 7 police, 2 rescue teams, 2 drones."</span>,
+    <span class="t-key">"reasoning"</span>: <span class="t-str">"G-10 flood priority score = 87 (4 × 8400 / 385 + 12). Heat emergency score = 32 (2 × 1200 / 75). G-10 gets 3 police, 1 rescue team, 1 ambulance. Heat gets 1 medical outreach team. Trade-off: Police unit 04 deprioritized from heat (score too low to justify diverting flood response)."</span>,
+    <span class="t-key">"error_recovery"</span>: <span class="t-str">"none"</span>,
+    <span class="t-key">"duration_ms"</span>: <span class="t-num">3200</span>
+  }
+],
+<span class="t-key">"final_outcome"</span>: <span class="t-str">"6 agents completed. Crisis classified urban_flooding confidence 0.87. 6 resources allocated. 4 actions simulated. 6 notifications dispatched. 1 conflict flagged for field verification."</span></div>
+  </div>
+
+  <div class="sub-h">Trace viewer — Flutter screen</div>
+  <div class="code-block">
+    <div class="code-bar"><span>screens/trace_viewer_screen.dart</span></div>
+    <pre><span class="c">// Fetches trace from /api/v1/traces/{id} and renders step-by-step</span>
+Widget build(BuildContext context) {
+  <span class="k">return</span> StreamBuilder&lt;AgentEvent&gt;(
+    stream: ref.watch(agentEventsProvider),
+    builder: (ctx, snap) {
+      <span class="k">return</span> ListView.builder(
+        itemCount: steps.length,
+        itemBuilder: (ctx, i) =&gt; TraceStepCard(
+          step: steps[i],
+          isLive: snap.data?.stepId == steps[i].id,   <span class="c">// highlight live step</span>
+        ),
+      );
+    },
+  );
+}</pre>
+  </div>
+
+  <div class="sub-h">Antigravity for planning phase (bonus — use Claude Code)</div>
+  <div class="g2">
+    <div class="card c-ag">
+      <div class="card-title">Using Antigravity for development planning</div>
+      <div class="card-body">Use Antigravity to generate your project workplan: agent architecture, API contracts, database schema. Export this planning trace as a separate JSON file. Include it in your submission README as evidence of Antigravity use during development. Show it in your 2–3 minute Antigravity video.</div>
+    </div>
+    <div class="card c-ag">
+      <div class="card-title">What to show in the Antigravity demo video (2–3 min)</div>
+      <div class="card-body">1. Show Antigravity dashboard/console running. 2. Inject a crisis signal and watch the workplan generate. 3. Show each agent step completing in real time. 4. Show the trace JSON viewer in your app. 5. Show the full trace file exported to Cloud Storage. This satisfies the "2–3 min screen recording of Antigravity usage" requirement.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════ CLAUDE CODE ══════════════════════════ -->
+<section class="section" id="claude-code">
+  <div class="sec-hd">
+    <div class="sec-eyebrow ey-re">Development tool</div>
+    <div class="sec-title">Claude Code — how to use it for CIRO</div>
+    <div class="sec-desc">Claude Code is Anthropic's CLI coding agent. It writes, edits, and runs code in your terminal. It does NOT conflict with Google Antigravity — they serve completely different purposes.</div>
+  </div>
+
+  <div class="note warn">Claude Code ≠ Google Antigravity. Claude Code is the tool you use to WRITE your code. Antigravity is what RUNS inside your app at runtime. Using Claude Code to write the CIRO backend does not count as "using Antigravity" for the challenge.</div>
+
+  <div class="sub-h">What Claude Code does vs. what Antigravity does</div>
+  <div class="g2">
+    <div class="card c-re">
+      <div class="card-title">Claude Code (development time)</div>
+      <div class="card-body">You run <code>claude</code> in your project folder. It reads your codebase, writes FastAPI endpoints, generates LangGraph graphs, creates Flutter screens, writes SQL migrations, runs tests, fixes bugs. It's your AI pair programmer.<br><br>Example: <code>claude "write the CrisisDetectionAgent LangGraph graph with the state schema and all nodes"</code></div>
+    </div>
+    <div class="card c-ag">
+      <div class="card-title">Google Antigravity (runtime)</div>
+      <div class="card-body">Your running app calls the Antigravity API. When a flooding signal comes in, Antigravity orchestrates your 6 LangGraph agents, records every decision and tool call, and exports the trace. This is what the judges score.<br><br>The Python code that calls Antigravity was written by Claude Code. The traces are generated by Antigravity at runtime.</div>
+    </div>
+  </div>
+
+  <div class="sub-h">Recommended Claude Code workflow for CIRO</div>
+  <div class="flow-steps">
+    <div class="flow-step">
+      <span class="fs-num">01</span>
+      <div class="fs-content">
+        <div class="fs-title">Install Claude Code</div>
+        <div class="fs-desc"><code>npm install -g @anthropic-ai/claude-code</code>, then <code>claude</code> in your project folder. It reads your entire codebase and maintains context across the session.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <span class="fs-num">02</span>
+      <div class="fs-content">
+        <div class="fs-title">Generate the FastAPI skeleton</div>
+        <div class="fs-desc">Tell Claude Code: "Create the FastAPI project structure with routers for crisis, resources, signals, alerts, traces, and ws. Include APScheduler startup and SQLAlchemy async setup." It writes all the files.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <span class="fs-num">03</span>
+      <div class="fs-content">
+        <div class="fs-title">Build LangGraph agents one by one</div>
+        <div class="fs-desc">For each agent: "Write the SignalFusionAgent LangGraph StateGraph with nodes for ingest, score_credibility, group_incidents, and a conditional edge for low-confidence clusters." Claude Code generates the graph, state class, and all node functions.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <span class="fs-num">04</span>
+      <div class="fs-content">
+        <div class="fs-title">Generate Flutter screens</div>
+        <div class="fs-desc">"Create the CrisisMapScreen in Flutter with Google Maps, Firestore stream listener via Riverpod, and severity-colored markers." Claude Code understands Flutter/Dart and generates the full widget tree.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <span class="fs-num">05</span>
+      <div class="fs-content">
+        <div class="fs-title">Write signal source connectors</div>
+        <div class="fs-desc">"Write the Reddit PRAW connector that searches r/pakistan and r/islamabad for posts matching crisis keywords, normalizes them to ScoredSignal schema, and returns a list." Fast to generate with Claude Code.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <span class="fs-num">06</span>
+      <div class="fs-content">
+        <div class="fs-title">How to mention Claude Code in your submission</div>
+        <div class="fs-desc">In your README, add a section: "Development tools: Code was written with Claude Code (Anthropic CLI). Google Antigravity was used for runtime agent orchestration — see traces in /traces/ folder." The submission requires Antigravity traces, not Claude Code evidence. But mentioning it shows professionalism.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub-h">Useful Claude Code prompts for CIRO</div>
+  <table class="tbl">
+    <tr><th>Task</th><th>Claude Code prompt</th></tr>
+    <tr><td>LangGraph agent</td><td>"Write the ResourceOptimizerAgent LangGraph graph. State schema needs: active_crises, resource_inventory, allocation_plan, trade_off_reasoning. Nodes: load_inventory, rank_by_impact, optimize, output_plan. Use Gemini Pro via LangChain."</td></tr>
+    <tr><td>FastAPI endpoint</td><td>"Add POST /crises/{id}/escalate endpoint to the crisis router. Validate severity 1-5. Update PostgreSQL via SQLAlchemy. Update Firestore crisis doc. Trigger resource re-optimization via Celery. Return EscalationResponse."</td></tr>
+    <tr><td>Flutter screen</td><td>"Build TraceViewerScreen in Flutter. Fetch /api/v1/traces/{id}. Display workplan as a header list. Render each step as a collapsible card showing: agent name, reasoning, output, duration. Use Riverpod FutureProvider."</td></tr>
+    <tr><td>Signal connector</td><td>"Write async function to fetch posts from r/pakistan and r/islamabad using PRAW. Search for keywords: flood, flooding, accident, fire, power outage, heatwave. Return list of ScoredSignal with credibility 0.65 and source_type social."</td></tr>
+    <tr><td>DB migration</td><td>"Write Alembic migration to create crisis_events, crisis_signals, resources, notification_log, antigravity_traces tables as per the schema in SCHEMA.md."</td></tr>
+    <tr><td>Mock IoT data</td><td>"Write mock_iot.py that generates realistic random-walk data for 5 flood sensors (water level in cm, 0-200), 3 air quality sensors (AQI 0-500), and 5 temperature sensors (20-50°C). Publish via MQTT to test.mosquitto.org. Simulate a gradual flood event starting at t+0."</td></tr>
+  </table>
+</section>
+
+<div class="footer">CIRO · Complete Implementation Guide · LangGraph + FastAPI + Flutter + Next.js + Google Antigravity · #AISeekho 2026</div>
+</div>
+
+<script>
+// Active nav link on scroll
+const links = document.querySelectorAll('.nav-link');
+const sections = document.querySelectorAll('.section');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      links.forEach(l => l.classList.remove('active'));
+      const id = e.target.getAttribute('id');
+      const link = document.querySelector(`.nav-link[href="#${id}"]`);
+      if (link) link.classList.add('active');
+    }
+  });
+}, { rootMargin: '-30% 0px -60% 0px' });
+sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

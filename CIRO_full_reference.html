@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIRO — #AISeekho 2026 · Full Challenge Reference</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;1,300&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:       #080b10;
+  --bg2:      #0d1117;
+  --bg3:      #131923;
+  --bg4:      #1a2130;
+  --line:     rgba(255,255,255,.055);
+  --line2:    rgba(255,255,255,.10);
+  --line3:    rgba(255,255,255,.17);
+  --text:     #dde3ef;
+  --muted:    #7a8ba8;
+  --dim:      #3f4e63;
+
+  --r:  #ff5252; --rbg: rgba(255,82,82,.10);  --rb: rgba(255,82,82,.22);
+  --b:  #4d8fff; --bbg: rgba(77,143,255,.10); --bb: rgba(77,143,255,.22);
+  --g:  #2dd68c; --gbg: rgba(45,214,140,.10); --gb: rgba(45,214,140,.22);
+  --a:  #ffaa33; --abg: rgba(255,170,51,.10); --ab: rgba(255,170,51,.22);
+  --p:  #9d7dff; --pbg: rgba(157,125,255,.10);--pb: rgba(157,125,255,.22);
+  --t:  #2dcfcf; --tbg: rgba(45,207,207,.10); --tb: rgba(45,207,207,.22);
+  --pi: #ff5ea3; --pibg:rgba(255,94,163,.10); --pib:rgba(255,94,163,.22);
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'IBM Plex Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.7;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 44px 44px;
+  pointer-events: none;
+}
+.page { position: relative; z-index: 1; max-width: 920px; margin: 0 auto; padding: 0 20px 100px; }
+
+/* ─── HERO ─── */
+.hero { padding: 64px 0 48px; border-bottom: 1px solid var(--line2); margin-bottom: 44px; }
+.eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; letter-spacing: .15em; color: var(--r);
+  margin-bottom: 14px; display: flex; align-items: center; gap: 10px;
+}
+.eyebrow::before { content: ''; width: 20px; height: 1px; background: var(--r); }
+h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(30px, 5.5vw, 50px);
+  font-weight: 800; line-height: 1.08; letter-spacing: -.02em; color: #fff;
+  margin-bottom: 16px;
+}
+h1 .accent { color: var(--r); }
+.hero-sub { font-size: 15px; color: var(--muted); max-width: 560px; margin-bottom: 28px; }
+.pills { display: flex; flex-wrap: wrap; gap: 7px; }
+.pill { font-size: 11.5px; padding: 4px 11px; border-radius: 20px; border: 1px solid; font-weight: 500; white-space: nowrap; }
+
+/* ─── TOC ─── */
+.toc { background: var(--bg2); border: 1px solid var(--line2); border-radius: 12px; padding: 22px 24px; margin-bottom: 48px; }
+.toc-hd { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: .14em; color: var(--dim); margin-bottom: 14px; }
+.toc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 3px; }
+.toc-a { display: flex; align-items: center; gap: 9px; font-size: 12.5px; color: var(--muted); text-decoration: none; padding: 6px 8px; border-radius: 6px; transition: all .14s; border: 1px solid transparent; }
+.toc-a:hover { color: var(--text); background: var(--bg3); border-color: var(--line2); }
+.toc-n { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--dim); min-width: 20px; }
+
+/* ─── SECTION ─── */
+.section { margin-bottom: 52px; scroll-margin-top: 20px; }
+.sec-hd { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 22px; padding-bottom: 18px; border-bottom: 1px solid var(--line2); }
+.sec-n { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--dim); min-width: 26px; padding-top: 4px; }
+.sec-info { flex: 1; }
+.sec-title { font-family: 'Syne', sans-serif; font-size: 19px; font-weight: 700; color: #fff; letter-spacing: -.01em; margin-bottom: 3px; }
+.sec-desc { font-size: 12.5px; color: var(--muted); }
+.sec-badge { font-family: 'IBM Plex Mono', monospace; font-size: 10px; padding: 3px 8px; border-radius: 4px; border: 1px solid var(--line2); color: var(--dim); background: var(--bg3); white-space: nowrap; margin-top: 2px; display: inline-block; }
+
+/* ─── TAG GROUPS ─── */
+.tag-grp { margin-bottom: 18px; }
+.tag-grp-lbl { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: .1em; color: var(--dim); margin-bottom: 9px; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+.tag-grp-lbl::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag { font-size: 12.5px; padding: 4px 11px; border-radius: 5px; border: 1px solid; }
+.tr  { background: var(--rbg); color: #ff9090; border-color: var(--rb); }
+.tb  { background: var(--bbg); color: #87b6ff; border-color: var(--bb); }
+.tg  { background: var(--gbg); color: #6fe8b0; border-color: var(--gb); }
+.ta  { background: var(--abg); color: #ffc870; border-color: var(--ab); }
+.tp  { background: var(--pbg); color: #bca0ff; border-color: var(--pb); }
+.tt  { background: var(--tbg); color: #6de6e6; border-color: var(--tb); }
+.tpi { background: var(--pibg);color: #ff8bbf; border-color: var(--pib); }
+.tgr { background: var(--bg3); color: var(--muted); border-color: var(--line2); }
+
+/* ─── CARDS ─── */
+.card { background: var(--bg2); border: 1px solid var(--line2); border-radius: 9px; padding: 16px 18px; margin-bottom: 9px; transition: border-color .13s; }
+.card:hover { border-color: var(--line3); }
+.card-title { font-family: 'Syne', sans-serif; font-size: 13.5px; font-weight: 600; color: #fff; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.card-body { font-size: 13px; color: var(--muted); line-height: 1.65; }
+.card-body p + p { margin-top: 8px; }
+.num-badge { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--dim); }
+
+.card.ar { border-left: 3px solid var(--r);  border-radius: 0 9px 9px 0; }
+.card.ab { border-left: 3px solid var(--b);  border-radius: 0 9px 9px 0; }
+.card.ag { border-left: 3px solid var(--g);  border-radius: 0 9px 9px 0; }
+.card.aa { border-left: 3px solid var(--a);  border-radius: 0 9px 9px 0; }
+.card.ap { border-left: 3px solid var(--p);  border-radius: 0 9px 9px 0; }
+.card.at { border-left: 3px solid var(--t);  border-radius: 0 9px 9px 0; }
+.card.api{ border-left: 3px solid var(--pi); border-radius: 0 9px 9px 0; }
+
+/* ─── GRID ─── */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 9px; }
+@media(max-width:700px){ .g2,.g3 { grid-template-columns: 1fr; } }
+
+/* ─── FLOW BAR ─── */
+.flow-bar { display: flex; background: var(--bg2); border: 1px solid var(--line2); border-radius: 9px; overflow: hidden; margin-bottom: 24px; flex-wrap: wrap; }
+.flow-step { flex: 1; min-width: 108px; padding: 14px 12px; border-right: 1px solid var(--line2); text-align: center; }
+.flow-step:last-child { border-right: none; }
+.fs-n { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--dim); letter-spacing: .08em; margin-bottom: 5px; text-transform: uppercase; }
+.fs-l { font-size: 12px; font-weight: 500; color: var(--text); line-height: 1.3; }
+
+/* ─── SCENARIO ─── */
+.scenario { background: var(--bg2); border: 1px solid var(--line2); border-radius: 9px; overflow: hidden; margin-bottom: 9px; }
+.sc-head { display: flex; align-items: center; gap: 10px; padding: 11px 16px; background: var(--bg3); border-bottom: 1px solid var(--line2); }
+.sc-badge { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 500; padding: 3px 9px; border-radius: 4px; border: 1px solid; white-space: nowrap; }
+.sc-title { font-size: 12.5px; font-weight: 500; color: var(--muted); }
+.sc-body { padding: 13px 16px; font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+/* ─── SCORE ─── */
+.score-item { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.score-lbl { font-size: 13px; color: var(--muted); min-width: 270px; }
+.score-track { flex: 1; height: 5px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+.score-fill { height: 100%; border-radius: 3px; }
+.score-pct { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 500; min-width: 34px; text-align: right; }
+
+/* ─── STRESS ─── */
+.stress { background: var(--bg2); border: 1px solid var(--line2); border-radius: 9px; padding: 16px 18px; margin-bottom: 9px; position: relative; overflow: hidden; }
+.stress::after { content: attr(data-l); position: absolute; right: 14px; top: 10px; font-family: 'Syne', sans-serif; font-size: 52px; font-weight: 800; opacity: .04; color: #fff; line-height: 1; pointer-events: none; }
+.stress-name { font-family: 'Syne', sans-serif; font-size: 13.5px; font-weight: 700; margin-bottom: 7px; }
+.stress-body { font-size: 13px; color: var(--muted); }
+
+/* ─── WARN ─── */
+.warn { background: rgba(255,82,82,.07); border: 1px solid var(--rb); border-radius: 9px; padding: 14px 18px; margin-bottom: 9px; display: flex; gap: 12px; }
+.warn-icon { font-size: 15px; flex-shrink: 0; padding-top: 2px; }
+.warn-body { font-size: 13px; color: var(--muted); }
+.warn-body strong { color: #ff9090; font-weight: 500; display: block; margin-bottom: 3px; }
+
+/* ─── NOTE ─── */
+.note { background: var(--bg3); border: 1px solid var(--line2); border-radius: 7px; padding: 11px 15px; font-size: 12.5px; color: var(--muted); margin-top: 12px; line-height: 1.6; }
+.note::before { content: '→ '; color: var(--a); }
+
+/* ─── DIVIDER ─── */
+hr { border: none; border-top: 1px solid var(--line2); margin: 20px 0; }
+
+/* ─── FROM-DOC BADGE ─── */
+.source-tag { font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; padding: 2px 7px; border-radius: 3px; border: 1px solid; vertical-align: middle; display: inline-block; }
+.from1 { background: var(--pbg); color: #bca0ff; border-color: var(--pb); }
+.from2 { background: var(--gbg); color: #6fe8b0; border-color: var(--gb); }
+
+/* ─── SUB HEADING ─── */
+.sub-h { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: .12em; color: var(--dim); text-transform: uppercase; margin: 18px 0 10px; display: flex; align-items: center; gap: 8px; }
+.sub-h::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+
+/* ─── FOOTER ─── */
+.footer { border-top: 1px solid var(--line2); margin-top: 60px; padding-top: 24px; font-size: 11.5px; color: var(--dim); text-align: center; font-family: 'IBM Plex Mono', monospace; }
+
+/* ─── ANIM ─── */
+@keyframes up { from { opacity:0; transform: translateY(18px); } to { opacity:1; transform: translateY(0); } }
+.section { animation: up .38s ease both; }
+.section:nth-child(1)  { animation-delay:.04s; }
+.section:nth-child(2)  { animation-delay:.08s; }
+.section:nth-child(3)  { animation-delay:.12s; }
+.section:nth-child(4)  { animation-delay:.16s; }
+.section:nth-child(5)  { animation-delay:.20s; }
+.section:nth-child(6)  { animation-delay:.24s; }
+.section:nth-child(7)  { animation-delay:.28s; }
+.section:nth-child(8)  { animation-delay:.32s; }
+.section:nth-child(9)  { animation-delay:.36s; }
+.section:nth-child(10) { animation-delay:.40s; }
+.section:nth-child(11) { animation-delay:.44s; }
+.section:nth-child(12) { animation-delay:.48s; }
+.section:nth-child(13) { animation-delay:.52s; }
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- HERO -->
+<header class="hero">
+  <div class="eyebrow">#AISeekho 2026 — Challenge 3 — Full Reference</div>
+  <h1>Crisis Intelligence &amp;<br><span class="accent">Response Orchestrator</span></h1>
+  <p class="hero-sub">Every requirement, signal, workflow, resource, stakeholder, scenario, deliverable, and evaluation criterion — extracted in full from both official documents.</p>
+  <div class="pills">
+    <span class="pill" style="background:var(--rbg);color:#ff9090;border-color:var(--rb)">Agentic system</span>
+    <span class="pill" style="background:var(--pbg);color:#bca0ff;border-color:var(--pb)">Google Antigravity mandatory</span>
+    <span class="pill" style="background:var(--bbg);color:#87b6ff;border-color:var(--bb)">Min 3 signal sources</span>
+    <span class="pill" style="background:var(--gbg);color:#6fe8b0;border-color:var(--gb)">Mobile app mandatory</span>
+    <span class="pill" style="background:var(--abg);color:#ffc870;border-color:var(--ab)">Dual crisis handling required</span>
+    <span class="pill" style="background:var(--bg3);color:var(--muted);border-color:var(--line2)"><span class="source-tag from1" style="margin-right:5px">PDF 1</span> Challenge 3 spec</span>
+    <span class="pill" style="background:var(--bg3);color:var(--muted);border-color:var(--line2)"><span class="source-tag from2" style="margin-right:5px">PDF 2</span> Shared submission checklist</span>
+  </div>
+</header>
+
+<!-- TOC -->
+<nav class="toc">
+  <div class="toc-hd">// CONTENTS</div>
+  <div class="toc-grid">
+    <a href="#s1"  class="toc-a"><span class="toc-n">01</span>Crisis types</a>
+    <a href="#s2"  class="toc-a"><span class="toc-n">02</span>Signal sources</a>
+    <a href="#s3"  class="toc-a"><span class="toc-n">03</span>Problem statements</a>
+    <a href="#s4"  class="toc-a"><span class="toc-n">04</span>Mandatory requirements</a>
+    <a href="#s5"  class="toc-a"><span class="toc-n">05</span>Enhanced requirements</a>
+    <a href="#s6"  class="toc-a"><span class="toc-n">06</span>Demanded workflow/flow</a>
+    <a href="#s7"  class="toc-a"><span class="toc-n">07</span>All simulations</a>
+    <a href="#s8"  class="toc-a"><span class="toc-n">08</span>Resources to allocate</a>
+    <a href="#s9"  class="toc-a"><span class="toc-n">09</span>Stakeholders</a>
+    <a href="#s10" class="toc-a"><span class="toc-n">10</span>Stress-test scenarios</a>
+    <a href="#s11" class="toc-a"><span class="toc-n">11</span>Deliverables — PDF 1</a>
+    <a href="#s12" class="toc-a"><span class="toc-n">12</span>Deliverables — PDF 2</a>
+    <a href="#s13" class="toc-a"><span class="toc-n">13</span>Evaluation criteria</a>
+    <a href="#s14" class="toc-a"><span class="toc-n">14</span>Judge's checklist</a>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════ S1 ═══ -->
+<section class="section" id="s1">
+  <div class="sec-hd">
+    <span class="sec-n">01</span>
+    <div class="sec-info">
+      <div class="sec-title">All crisis / problem types</div>
+      <div class="sec-desc">Every localized urban crisis the system must be able to detect, classify, and respond to</div>
+      <span class="sec-badge source-tag from1">PDF 1 — Challenge overview</span>
+    </div>
+  </div>
+  <div class="tags">
+    <span class="tag tr">Urban flooding</span>
+    <span class="tag tr">Heatwave / heat emergency</span>
+    <span class="tag tr">Road blockage</span>
+    <span class="tag tr">Accident</span>
+    <span class="tag tr">Infrastructure failure</span>
+    <span class="tag tr">Power outage</span>
+    <span class="tag tr">Public disorder</span>
+    <span class="tag tr">Disease cluster / spike</span>
+  </div>
+  <div class="note">The system must handle at least two of these simultaneously, showing explicit trade-offs when they compete for the same resources.</div>
+</section>
+
+<!-- ═══════════════════════════════════ S2 ═══ -->
+<section class="section" id="s2">
+  <div class="sec-hd">
+    <span class="sec-n">02</span>
+    <div class="sec-info">
+      <div class="sec-title">All signal sources</div>
+      <div class="sec-desc">Every input type the system must ingest and fuse — minimum 3 required simultaneously</div>
+      <span class="sec-badge source-tag from1">PDF 1 — Problem statement + Enhanced requirements</span>
+    </div>
+  </div>
+
+  <div class="tag-grp">
+    <div class="tag-grp-lbl">Layer 1 — Social media &amp; citizen reports</div>
+    <div class="tags">
+      <span class="tag tb">X (Twitter) posts</span>
+      <span class="tag tb">Telegram reports &amp; channels</span>
+      <span class="tag tb">Reddit threads &amp; local subreddits</span>
+      <span class="tag tb">WhatsApp community alerts</span>
+      <span class="tag tb">Facebook community posts</span>
+      <span class="tag tb">Instagram geotagged posts</span>
+      <span class="tag tb">Citizen complaint portals</span>
+      <span class="tag tb">Emergency call frequency data</span>
+      <span class="tag tb">Field reports from responders</span>
+    </div>
+    <div class="note">The document refers to this collectively as "social media / citizen posts." The specific platforms above (Telegram, X, Reddit, etc.) are the real-world sources that map to this category.</div>
+  </div>
+
+  <div class="tag-grp">
+    <div class="tag-grp-lbl">Layer 2 — Environmental &amp; sensor data</div>
+    <div class="tags">
+      <span class="tag tt">Weather API (rainfall, temperature, humidity, wind)</span>
+      <span class="tag tt">Mock IoT sensors (flood level, air quality, heat index)</span>
+      <span class="tag tt">Historical vulnerability maps</span>
+    </div>
+  </div>
+
+  <div class="tag-grp">
+    <div class="tag-grp-lbl">Layer 3 — Infrastructure &amp; logistics</div>
+    <div class="tags">
+      <span class="tag tg">Traffic maps &amp; congestion data</span>
+      <span class="tag tg">Public transport status feeds</span>
+      <span class="tag tg">Hospital capacity / readiness feeds</span>
+      <span class="tag tg">Utility company alert feeds</span>
+    </div>
+  </div>
+
+  <div class="sub-h">Per-signal scoring dimensions (required)</div>
+  <div class="g2">
+    <div class="card"><div class="card-title">Source credibility score</div><div class="card-body">Verified official vs. anonymous social post. Official sensors score higher than anonymous tweets.</div></div>
+    <div class="card"><div class="card-title">Geolocation confidence</div><div class="card-body">How precisely can the signal be located? GPS-tagged vs. vague neighborhood reference.</div></div>
+    <div class="card"><div class="card-title">Urgency language score</div><div class="card-body">NLP-assessed intensity of language used in the signal. "Water entering homes" vs. "street looks wet."</div></div>
+    <div class="card"><div class="card-title">Mention velocity</div><div class="card-body">How fast is this signal spreading? Spike in posts over 5 minutes = higher urgency weighting.</div></div>
+    <div class="card"><div class="card-title">Contradiction level</div><div class="card-body">Does this signal contradict other concurrent signals? Conflicting signals must be flagged before action.</div></div>
+  </div>
+  <div class="note">Low-confidence or suspicious signals must be flagged and held for verification — they must NOT directly trigger emergency actions without escalation logic.</div>
+</section>
+
+<!-- ═══════════════════════════════════ S3 ═══ -->
+<section class="section" id="s3">
+  <div class="sec-hd">
+    <span class="sec-n">03</span>
+    <div class="sec-info">
+      <div class="sec-title">All problem statements</div>
+      <div class="sec-desc">The 5 core tasks the agentic system must accomplish</div>
+      <span class="sec-badge source-tag from1">PDF 1 — Problem statement section</span>
+    </div>
+  </div>
+  <div class="card ap"><div class="card-title"><span class="num-badge">PS-1</span> Multi-source signal ingestion &amp; fusion</div><div class="card-body">Ingest and fuse at least three signal sources — social posts, weather, traffic, emergency calls, mock sensors, field reports, and/or historical data — into a single unified, real-time crisis picture.</div></div>
+  <div class="card ap"><div class="card-title"><span class="num-badge">PS-2</span> Crisis detection &amp; classification</div><div class="card-body">Detect and classify each crisis by: type, location, severity level, confidence score, affected population size, expected duration, and likely evolution path over time.</div></div>
+  <div class="card ap"><div class="card-title"><span class="num-badge">PS-3</span> Constrained resource prioritization &amp; allocation</div><div class="card-body">Prioritize and allocate constrained response resources across one or more simultaneous crises. Show the optimization logic and explicit trade-offs when resources are insufficient for all needs.</div></div>
+  <div class="card ap"><div class="card-title"><span class="num-badge">PS-4</span> Coordinated response simulation</div><div class="card-body">Simulate coordinated actions such as traffic rerouting, emergency dispatch, hospital preparation, utility escalation, and public alerts. Show the predicted impact of each action.</div></div>
+  <div class="card ap"><div class="card-title"><span class="num-badge">PS-5</span> Outcome prediction &amp; error recovery</div><div class="card-body">Predict outcomes, side effects, and unintended consequences for each response action. Handle false positives, false negatives, and conflicting signals through verification and escalation logic — including ability to retract alerts.</div></div>
+</section>
+
+<!-- ═══════════════════════════════════ S4 ═══ -->
+<section class="section" id="s4">
+  <div class="sec-hd">
+    <span class="sec-n">04</span>
+    <div class="sec-info">
+      <div class="sec-title">Mandatory system requirements — Google Antigravity</div>
+      <div class="sec-desc">Non-negotiable. The entire system must be orchestrated through Antigravity.</div>
+      <span class="sec-badge source-tag from1">PDF 1 — Mandatory requirement section</span>
+    </div>
+  </div>
+  <div class="card aa"><div class="card-title">Antigravity as the orchestration backbone</div><div class="card-body">Use Google Antigravity to orchestrate multi-agent crisis detection, signal fusion, severity analysis, resource allocation, stakeholder communication, and action simulation. External APIs and mock data streams are allowed as inputs, but Antigravity must coordinate all planning and execution — not just wrap it.</div></div>
+  <div class="card aa"><div class="card-title">Antigravity traces must be visible for all of:</div><div class="card-body">
+    <div class="tags" style="margin-top:4px">
+      <span class="tag ta">Signal interpretation</span>
+      <span class="tag ta">Confidence scoring</span>
+      <span class="tag ta">Priority ranking</span>
+      <span class="tag ta">Resource trade-off decisions</span>
+      <span class="tag ta">Action execution</span>
+      <span class="tag ta">Recovery from false/conflicting signals</span>
+    </div>
+  </div></div>
+  <div class="note">External APIs and mock streams are allowed, but Antigravity must coordinate planning and execution — judges will check the traces to verify this.</div>
+</section>
+
+<!-- ═══════════════════════════════════ S5 ═══ -->
+<section class="section" id="s5">
+  <div class="sec-hd">
+    <span class="sec-n">05</span>
+    <div class="sec-info">
+      <div class="sec-title">All enhanced system requirements</div>
+      <div class="sec-desc">10 advanced capabilities — these define the depth expected in a competitive submission</div>
+      <span class="sec-badge source-tag from1">PDF 1 — Enhanced system requirements</span>
+    </div>
+  </div>
+
+  <div class="card ab"><div class="card-title"><span class="num-badge">ER-1</span> Multi-signal fusion</div><div class="card-body">Use at least three signal source types simultaneously: social media/citizen posts, weather, maps/traffic, emergency call frequency, mock sensors, public transport status, or historical vulnerability maps. All must be fused into a unified incident model.</div></div>
+  <div class="card ab"><div class="card-title"><span class="num-badge">ER-2</span> Source credibility &amp; misinformation handling</div><div class="card-body">Score each incoming signal on all five dimensions: source credibility, geolocation confidence, urgency language, mention velocity, and contradiction level. Flag low-confidence or suspicious signals before they trigger any actions.</div></div>
+  <div class="card ab"><div class="card-title"><span class="num-badge">ER-3</span> Crisis classification</div><div class="card-body">Classify crisis type — flood, heatwave, accident, infrastructure failure, power outage, protest, or disease cluster — with an attached severity level and confidence score for each classification output.</div></div>
+  <div class="card ab"><div class="card-title"><span class="num-badge">ER-4</span> Severity &amp; evolution prediction</div><div class="card-body">Estimate all of the following: affected radius, affected population count, expected duration, peak impact time, spread risk, and an uncertainty range for every prediction made.</div></div>
+  <div class="card ab"><div class="card-title"><span class="num-badge">ER-5</span> Resource allocation optimization</div><div class="card-body">Model constrained resources: ambulances, police units, rescue teams, shelters, generators, water tankers, field teams, drones. Allocate based on impact severity, urgency, travel time to site, and real-time resource availability.</div></div>
+  <div class="card ab"><div class="card-title"><span class="num-badge">ER-6</span> Multi-crisis coordination</div><div class="card-body">Handle at least two simultaneous incidents. Explicitly show the trade-offs in prioritization and resource assignment when both incidents compete for the same constrained assets.</div></div>
+  <div class="card ab"><div class="card-title"><span class="num-badge">ER-7</span> Impact simulation</div><div class="card-body">For each planned response action, show all of: before-state → response action taken → expected after-state, response time improvement achieved, congestion impact, resource cost, and any possible side effects of the action itself.</div></div>
+  <div class="card ab"><div class="card-title"><span class="num-badge">ER-8</span> Stakeholder notification</div><div class="card-body">Generate tailored alert messages for all six stakeholder groups: the public, emergency services, hospitals, utility companies, transport authority, and media/command center. Each must receive different language, detail level, and call-to-action.</div></div>
+  <div class="card ab"><div class="card-title"><span class="num-badge">ER-9</span> False positive / negative handling</div><div class="card-body">Simulate a false alarm, an early low-confidence signal, or conflicting signals — and demonstrate the system's ability to verify, escalate, correct, or retract the alert with a full correction notification sent to stakeholders.</div></div>
+  <div class="card ab"><div class="card-title"><span class="num-badge">ER-10</span> Robustness &amp; degraded-mode operation</div><div class="card-body">Handle all of the following gracefully: API downtime, stale or missing data, missing geolocation, duplicate incident reports, and rate limiting — using fallback data sources or manual escalation paths when primary signals fail mid-response.</div></div>
+</section>
+
+<!-- ═══════════════════════════════════ S6 ═══ -->
+<section class="section" id="s6">
+  <div class="sec-hd">
+    <span class="sec-n">06</span>
+    <div class="sec-info">
+      <div class="sec-title">Demanded end-to-end workflow / flow</div>
+      <div class="sec-desc">The complete pipeline your demo must walk through — exactly as specified in both documents</div>
+      <span class="sec-badge source-tag from1">PDF 1</span>&nbsp;<span class="sec-badge source-tag from2">PDF 2</span>
+    </div>
+  </div>
+
+  <div class="flow-bar">
+    <div class="flow-step"><div class="fs-n">Stage 1</div><div class="fs-l">Multi-source input</div></div>
+    <div class="flow-step"><div class="fs-n">Stage 2</div><div class="fs-l">Crisis detection</div></div>
+    <div class="flow-step"><div class="fs-n">Stage 3</div><div class="fs-l">Severity prediction</div></div>
+    <div class="flow-step"><div class="fs-n">Stage 4</div><div class="fs-l">Resource allocation</div></div>
+    <div class="flow-step"><div class="fs-n">Stage 5</div><div class="fs-l">Simulated response</div></div>
+    <div class="flow-step"><div class="fs-n">Stage 6</div><div class="fs-l">Impact visualization</div></div>
+    <div class="flow-step"><div class="fs-n">Stage 7</div><div class="fs-l">Recovery / correction</div></div>
+  </div>
+
+  <div class="card at"><div class="card-title">Stage 1 — Multi-source input</div><div class="card-body">Ingest ≥3 signal streams at once. Score credibility of each. Flag contradictions between sources. Begin fusing all inputs into a unified, deduplicated event model.</div></div>
+  <div class="card at"><div class="card-title">Stage 2 — Crisis detection</div><div class="card-body">Output: incident type, location, confidence score, estimated affected population, and any conflicting hypotheses (e.g., "flooding" vs. "water main burst" as competing explanations for the same signals).</div></div>
+  <div class="card at"><div class="card-title">Stage 3 — Severity prediction</div><div class="card-body">Output: affected radius, likely duration, peak impact time, geographic spread risk, and an uncertainty range. These directly feed the resource allocation step.</div></div>
+  <div class="card at"><div class="card-title">Stage 4 — Resource allocation</div><div class="card-body">Inventory available constrained resources. Run the optimization. Assign resources across simultaneous incidents. Output the allocation plan and explicitly show what was deprioritized and why.</div></div>
+  <div class="card at"><div class="card-title">Stage 5 — Simulated response (coordinated actions)</div><div class="card-body">Execute these simulated actions: reroute traffic, create and dispatch emergency tickets, alert hospitals to prepare for intake, escalate to utilities, push tailored public notifications per stakeholder group.</div></div>
+  <div class="card at"><div class="card-title">Stage 6 — Impact visualization</div><div class="card-body">For every action taken, show: before/after state, response time delta, congestion change, resource cost incurred, and any unintended side effects introduced by the response itself.</div></div>
+  <div class="card at"><div class="card-title">Stage 7 — Recovery / correction</div><div class="card-body">When field verification contradicts initial classification: update the crisis model, retract or revise the relevant alerts, send correction notifications to all affected stakeholders, and log the full audit trail of what changed and why.</div></div>
+
+  <div class="sub-h">Antigravity internal workflow (also demanded — PDF 2)</div>
+  <div class="note">Within Antigravity, the agent must produce and expose: workplan, task plan, agent observations, reasoning, decisions, tool calls made, action execution logs, error recovery steps, and final outcomes — all as inspectable traces.</div>
+</section>
+
+<!-- ═══════════════════════════════════ S7 ═══ -->
+<section class="section" id="s7">
+  <div class="sec-hd">
+    <span class="sec-n">07</span>
+    <div class="sec-info">
+      <div class="sec-title">All simulations &amp; the official example scenario</div>
+      <div class="sec-desc">The full dual-crisis example from the document, stage by stage</div>
+      <span class="sec-badge source-tag from1">PDF 1 — Example scenario</span>
+    </div>
+  </div>
+
+  <div class="scenario">
+    <div class="sc-head"><span class="sc-badge" style="background:var(--bbg);color:#87b6ff;border-color:var(--bb)">INPUT SIGNALS</span><span class="sc-title">What enters the system</span></div>
+    <div class="sc-body">Social media posts report flooding in area G-10. The weather API confirms heavy rainfall. The traffic API shows a congestion spike in the same zone. One field report contradicts — it suggests a broken water main rather than actual flooding. Simultaneously, and independently, a heat emergency is reported in a nearby low-income neighborhood.</div>
+  </div>
+
+  <div class="scenario">
+    <div class="sc-head"><span class="sc-badge" style="background:var(--pbg);color:#bca0ff;border-color:var(--pb)">DETECTION OUTPUT</span><span class="sc-title">What the system classifies and surfaces</span></div>
+    <div class="sc-body">Classifies the G-10 incident as <em>probable urban flooding</em> with a confidence score. Separately identifies the conflicting water-main hypothesis and flags it as requiring field verification before the response plan is locked. Independently classifies the heat emergency in the low-income neighborhood with its own severity score and affected population estimate.</div>
+  </div>
+
+  <div class="scenario">
+    <div class="sc-head"><span class="sc-badge" style="background:var(--abg);color:#ffc870;border-color:var(--ab)">PREDICTION OUTPUT</span><span class="sc-title">What the system estimates</span></div>
+    <div class="sc-body">Estimates affected zones for both incidents. Predicts likely duration of each, congestion spread path, and vulnerable population risk — particularly noting that residents in the low-income neighborhood may lack access to cooling, elevating the heat emergency's severity.</div>
+  </div>
+
+  <div class="scenario">
+    <div class="sc-head"><span class="sc-badge" style="background:var(--gbg);color:#6fe8b0;border-color:var(--gb)">RESOURCE ALLOCATION</span><span class="sc-title">How limited resources are split across two live crises</span></div>
+    <div class="sc-body">Prioritizes rescue teams and police traffic units for G-10 (flooding, higher area impact). Assigns medical outreach teams to the low-income neighborhood heat emergency. Allocation decisions are based on severity scores and resource constraints — the trade-offs are output explicitly so the operator can see exactly what was deprioritized.</div>
+  </div>
+
+  <div class="scenario">
+    <div class="sc-head"><span class="sc-badge" style="background:var(--tbg);color:#6de6e6;border-color:var(--tb)">SIMULATION (ACTIONS TAKEN)</span><span class="sc-title">Coordinated response executed</span></div>
+    <div class="sc-body">Reroutes traffic away from G-10. Creates an emergency dispatch ticket. Sends a public alert. Notifies the hospital to prepare for intake. Updates the incident command dashboard. Simulates the resulting effect on response time and overall congestion levels, including any side effects.</div>
+  </div>
+
+  <div class="scenario">
+    <div class="sc-head"><span class="sc-badge" style="background:var(--rbg);color:#ff9090;border-color:var(--rb)">RECOVERY / CORRECTION</span><span class="sc-title">When the initial classification was wrong</span></div>
+    <div class="sc-body">Field verification confirms only a water-main burst — not widespread flooding. The system updates the classification. Retracts the public flood alert. Sends a correction notification. Notifies the utility provider to address the burst. Logs the full correction with an audit trail of what changed, why, and which stakeholders were re-notified.</div>
+  </div>
+
+  <div class="sub-h">What each simulation output must contain (ER-7)</div>
+  <div class="g2">
+    <div class="card"><div class="card-title">Before-state</div><div class="card-body">What the situation looked like before the response action was executed.</div></div>
+    <div class="card"><div class="card-title">Response action</div><div class="card-body">The specific action taken: dispatch, reroute, alert, escalate, etc.</div></div>
+    <div class="card"><div class="card-title">Expected after-state</div><div class="card-body">Predicted state of the incident and infrastructure after the action takes effect.</div></div>
+    <div class="card"><div class="card-title">Response time improvement</div><div class="card-body">Quantified delta in how quickly responders or resources reach the scene.</div></div>
+    <div class="card"><div class="card-title">Congestion impact</div><div class="card-body">Effect of the action on traffic flow and public movement in the affected area.</div></div>
+    <div class="card"><div class="card-title">Resource cost</div><div class="card-body">What resources were consumed or tied up by this action.</div></div>
+    <div class="card"><div class="card-title">Possible side effects</div><div class="card-body">Any unintended consequences — e.g., rerouting creating congestion elsewhere, alert causing panic.</div></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════ S8 ═══ -->
+<section class="section" id="s8">
+  <div class="sec-hd">
+    <span class="sec-n">08</span>
+    <div class="sec-info">
+      <div class="sec-title">All resources to be allocated</div>
+      <div class="sec-desc">Every constrained asset the system must model, assign, and optimize across simultaneous crises</div>
+      <span class="sec-badge source-tag from1">PDF 1 — ER-5 Resource allocation optimization</span>
+    </div>
+  </div>
+  <div class="tags" style="margin-bottom:14px">
+    <span class="tag tg">Ambulances</span>
+    <span class="tag tg">Police units</span>
+    <span class="tag tg">Rescue teams</span>
+    <span class="tag tg">Shelters</span>
+    <span class="tag tg">Generators</span>
+    <span class="tag tg">Water tankers</span>
+    <span class="tag tg">Field teams</span>
+    <span class="tag tg">Drones</span>
+  </div>
+  <div class="sub-h">Allocation must be based on all four factors simultaneously</div>
+  <div class="g2">
+    <div class="card"><div class="card-title">Impact severity</div><div class="card-body">How severe is the crisis? Higher severity = higher resource priority.</div></div>
+    <div class="card"><div class="card-title">Urgency</div><div class="card-body">How fast is the situation deteriorating? Time-critical crises take precedence.</div></div>
+    <div class="card"><div class="card-title">Travel time to site</div><div class="card-body">Distance and route availability from resource location to incident zone.</div></div>
+    <div class="card"><div class="card-title">Resource availability</div><div class="card-body">Current deployment status — are units already assigned elsewhere?</div></div>
+  </div>
+  <div class="note">From the example: "police traffic units" are specifically allocated to G-10 for flooding response. Police appear explicitly as an emergency response resource — not just as a notification stakeholder.</div>
+</section>
+
+<!-- ═══════════════════════════════════ S9 ═══ -->
+<section class="section" id="s9">
+  <div class="sec-hd">
+    <span class="sec-n">09</span>
+    <div class="sec-info">
+      <div class="sec-title">All stakeholders — who gets notified, how differently</div>
+      <div class="sec-desc">6 distinct audiences each requiring a tailored message with different language, detail, and call-to-action</div>
+      <span class="sec-badge source-tag from1">PDF 1 — ER-8 Stakeholder notification</span>
+    </div>
+  </div>
+
+  <div class="card api"><div class="card-title">General public</div><div class="card-body">Evacuation instructions, areas to avoid, emergency contact numbers, nearest shelter locations. Plain language — no technical jargon. Staged alerts to avoid panic-induced congestion. Retraction messages if a false alarm is corrected.</div></div>
+  <div class="card api"><div class="card-title">Emergency services (includes police units, rescue teams, fire, paramedics)</div><div class="card-body">Dispatch coordinates, severity classification, specific resource assignment, estimated arrival corridors, suggested routes. Real-time updates as the situation evolves. Police traffic units receive routing instructions and blockade coordinates.</div></div>
+  <div class="card api"><div class="card-title">Hospitals</div><div class="card-body">Expected patient surge estimate, injury type profile (flood injuries, heat exhaustion/stroke, trauma), required readiness level, estimated ETA of incoming cases, specific ward preparation needed.</div></div>
+  <div class="card api"><div class="card-title">Utility companies</div><div class="card-body">Escalation alert for power, water, or sewage infrastructure at risk or already compromised. Repair priority level, affected grid zones or pipeline segments, estimated duration of impact, and utility-specific action items.</div></div>
+  <div class="card api"><div class="card-title">Transport authority</div><div class="card-body">Rerouting instructions, affected transit lines, road/bridge closures, estimated clearance time, staging area coordinates for transport-based evacuation support.</div></div>
+  <div class="card api"><div class="card-title">Media / command center</div><div class="card-body">Incident summary, current confidence level, actions taken, current resource deployment status, predicted crisis evolution, and press-ready briefing language for public communication.</div></div>
+
+  <div class="note">Police as a stakeholder: police units are explicitly listed as emergency response resources (ambulances, <strong>police units</strong>, rescue teams…). For notification purposes, police fall under "emergency services" — which is one of the 6 stakeholder groups. The system must send them dispatch coordinates, assignment details, and real-time updates.</div>
+</section>
+
+<!-- ═══════════════════════════════════ S10 ═══ -->
+<section class="section" id="s10">
+  <div class="sec-hd">
+    <span class="sec-n">10</span>
+    <div class="sec-info">
+      <div class="sec-title">All recommended stress-test scenarios</div>
+      <div class="sec-desc">4 failure modes the system must survive and demonstrate</div>
+      <span class="sec-badge source-tag from1">PDF 1 — Recommended stress-test scenarios</span>
+    </div>
+  </div>
+
+  <div class="stress" data-l="A">
+    <div class="stress-name" style="color:var(--r)">Scenario A — Resource war</div>
+    <div class="stress-body">Two or more crises occur within 30 minutes and compete for the same limited emergency resources. The system must break the tie based on optimization logic, clearly show what was deprioritized and why, and adapt in real time if one crisis escalates.</div>
+  </div>
+  <div class="stress" data-l="B">
+    <div class="stress-name" style="color:var(--a)">Scenario B — Sensor blackout</div>
+    <div class="stress-body">Social media indicates flooding but official sensor data is unavailable or directly contradictory. The system must show how it handles high-velocity, low-confidence social signals without official confirmation — avoiding both dangerous over-reaction and dangerous inaction.</div>
+  </div>
+  <div class="stress" data-l="C">
+    <div class="stress-name" style="color:var(--b)">Scenario C — Mid-response API failure</div>
+    <div class="stress-body">A data API (weather, traffic, or sensor) fails while a crisis response is already in progress. The system must fall back to cached or alternate data sources and continue operating — not stall, crash, or silently degrade without notification.</div>
+  </div>
+  <div class="stress" data-l="D">
+    <div class="stress-name" style="color:var(--t)">Scenario D — Alert backfire + false alarm correction</div>
+    <div class="stress-body">A public evacuation alert causes evacuation congestion that worsens the crisis itself. The system must detect this side effect and trigger staged re-alerting or rerouting. The scenario then requires a full false alarm correction cycle: apology/retraction message, updated classification, and a log update with full audit trail.</div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════ S11 ═══ -->
+<section class="section" id="s11">
+  <div class="sec-hd">
+    <span class="sec-n">11</span>
+    <div class="sec-info">
+      <div class="sec-title">Deliverables — Challenge 3 specific (PDF 1)</div>
+      <div class="sec-desc">4 items listed directly in the Challenge 3 specification</div>
+      <span class="sec-badge source-tag from1">PDF 1 — Deliverables section</span>
+    </div>
+  </div>
+
+  <div class="card ag"><div class="card-title"><span class="num-badge">D1</span> Working prototype</div><div class="card-body">Mobile app is mandatory. Web app / dashboard is optional — include only if it adds meaningful demonstration value. Must run the full agentic pipeline, not be a static mockup.</div></div>
+  <div class="card ag"><div class="card-title"><span class="num-badge">D2</span> Demo video — 3 to 5 minutes</div><div class="card-body">Must demonstrate the complete pipeline in one continuous flow:<br><br><strong>multi-source input → crisis detection → severity prediction → resource allocation → simulated response → impact visualization → recovery scenario</strong><br><br>Must show agentic workflow end to end — not just UI screenshots.</div></div>
+  <div class="card ag"><div class="card-title"><span class="num-badge">D3</span> Antigravity agent trace / logs</div><div class="card-body">Must contain logged, inspectable records of all of: signal fusion steps, confidence scoring decisions, crisis classification reasoning, allocation trade-off logic, stakeholder message generation, action execution logs, and fallback / error recovery behavior.</div></div>
+  <div class="card ag"><div class="card-title"><span class="num-badge">D4</span> README / documentation</div><div class="card-body">Must include all of the following sections:
+    <div class="tags" style="margin-top:9px">
+      <span class="tag tg">System architecture diagram</span>
+      <span class="tag tg">Data stream schemas</span>
+      <span class="tag tg">Antigravity usage explanation</span>
+      <span class="tag tg">APIs and tools used</span>
+      <span class="tag tg">Assumptions made</span>
+      <span class="tag tg">Privacy and safety note</span>
+      <span class="tag tg">Cost / latency analysis</span>
+      <span class="tag tg">Baseline comparison (agentic vs. non-agentic)</span>
+      <span class="tag tg">Scalability discussion (10x / 100x)</span>
+      <span class="tag tg">Known limitations</span>
+    </div>
+  </div></div>
+</section>
+
+<!-- ═══════════════════════════════════ S12 ═══ -->
+<section class="section" id="s12">
+  <div class="sec-hd">
+    <span class="sec-n">12</span>
+    <div class="sec-info">
+      <div class="sec-title">Deliverables — Shared submission checklist (PDF 2)</div>
+      <div class="sec-desc">Additional requirements from the shared checklist that apply to ALL challenges including CIRO — these are on top of the challenge-3-specific deliverables</div>
+      <span class="sec-badge source-tag from2">PDF 2 — Shared submission checklist</span>
+    </div>
+  </div>
+
+  <div class="card at"><div class="card-title">Working prototype — clarified rule</div><div class="card-body">Mobile app is mandatory for all challenges. Web app / dashboard is optional unless specifically needed for demonstration. This confirms what PDF 1 states — both documents agree here.</div></div>
+
+  <div class="card at"><div class="card-title">Demo video — duration rules per challenge</div><div class="card-body">
+    <strong>Challenges 1–3 (including CIRO):</strong> 3–5 minutes. Must show agentic workflow end to end.<br>
+    <strong>Challenge 4:</strong> Around 3 minutes.<br>
+    This is a slight disambiguation — PDF 1 says "3–5 minutes," PDF 2 confirms this applies to Challenges 1–3 specifically.
+  </div></div>
+
+  <div class="card at"><div class="card-title">Second video — Antigravity usage recording (additional requirement from PDF 2)</div><div class="card-body">A separate 2–3 minute screen recording showing specifically how your team made use of Antigravity solutions — not just showing the final product, but showing the Antigravity tooling and traces being used. This is in addition to the main demo video.</div></div>
+
+  <div class="card at"><div class="card-title">Antigravity trace / logs — expanded definition (PDF 2 adds more detail)</div><div class="card-body">PDF 2 specifies that the trace must show all of: <strong>workplan, task plan, agent observations, reasoning, decisions, tool calls, action execution, error recovery, and final outcomes</strong>. This is more granular than PDF 1's description and should be treated as the authoritative list of what the trace must contain.</div></div>
+
+  <div class="card at"><div class="card-title">README / documentation — setup steps added (PDF 2 adds one more)</div><div class="card-body">PDF 2 adds "setup steps" to the README requirements. So the README must also include: clear instructions on how to set up and run the system locally or in a demo environment.</div></div>
+
+  <div class="card at"><div class="card-title">Baseline comparison (explicitly required)</div><div class="card-body">Show how the agentic system performs better than a simple heuristic or non-agentic implementation. This must be a quantified or demonstrable comparison — not just a claim. Include this in both the demo and the README.</div></div>
+
+  <div class="card at"><div class="card-title">Robustness evidence (at least one required)</div><div class="card-body">At least one of the following must be demonstrated: failure scenario, edge case, contradiction handling, missing data handling, or fallback scenario. This aligns with stress-test scenarios A–D from PDF 1.</div></div>
+
+  <div class="card at"><div class="card-title">Cost and scalability note (required in README)</div><div class="card-body">Must include all three:
+    <div class="tags" style="margin-top:8px">
+      <span class="tag tt">Cost per operation or per API call estimate</span>
+      <span class="tag tt">10x / 100x scaling discussion</span>
+      <span class="tag tt">Latency or throughput estimate</span>
+    </div>
+  </div></div>
+
+  <div class="note">PDF 2 adds detail and some additional items not in PDF 1. The two documents are complementary, not contradictory — treat PDF 2's Shared Checklist as the final, more detailed authority on what each deliverable must contain.</div>
+</section>
+
+<!-- ═══════════════════════════════════ S13 ═══ -->
+<section class="section" id="s13">
+  <div class="sec-hd">
+    <span class="sec-n">13</span>
+    <div class="sec-info">
+      <div class="sec-title">Evaluation criteria</div>
+      <div class="sec-desc">Scoring weights from the Challenge 3 specification — 100 points total</div>
+      <span class="sec-badge source-tag from1">PDF 1 — Evaluation criteria</span>
+    </div>
+  </div>
+
+  <div class="score-item"><div class="score-lbl">Crisis detection &amp; severity analysis</div><div class="score-track"><div class="score-fill" style="width:25%;background:var(--p)"></div></div><div class="score-pct" style="color:var(--p)">25%</div></div>
+  <div class="score-item"><div class="score-lbl">Antigravity integration</div><div class="score-track"><div class="score-fill" style="width:20%;background:var(--g)"></div></div><div class="score-pct" style="color:var(--g)">20%</div></div>
+  <div class="score-item"><div class="score-lbl">Resource optimization &amp; multi-crisis coordination</div><div class="score-track"><div class="score-fill" style="width:20%;background:var(--g)"></div></div><div class="score-pct" style="color:var(--g)">20%</div></div>
+  <div class="score-item"><div class="score-lbl">Impact simulation &amp; stakeholder coordination</div><div class="score-track"><div class="score-fill" style="width:15%;background:var(--a)"></div></div><div class="score-pct" style="color:var(--a)">15%</div></div>
+  <div class="score-item"><div class="score-lbl">Robustness, scalability, cost &amp; latency</div><div class="score-track"><div class="score-fill" style="width:10%;background:var(--b)"></div></div><div class="score-pct" style="color:var(--b)">10%</div></div>
+  <div class="score-item"><div class="score-lbl">Innovation &amp; UX</div><div class="score-track"><div class="score-fill" style="width:10%;background:var(--t)"></div></div><div class="score-pct" style="color:var(--t)">10%</div></div>
+
+  <div class="note">Top 3 criteria (crisis detection 25% + Antigravity 20% + resource optimization 20%) = 65% of your score. The shared submission checklist from PDF 2 does not add separate point weights — it defines what must be present to satisfy each criterion, especially Antigravity integration and robustness.</div>
+</section>
+
+<!-- ═══════════════════════════════════ S14 ═══ -->
+<section class="section" id="s14">
+  <div class="sec-hd">
+    <span class="sec-n">14</span>
+    <div class="sec-info">
+      <div class="sec-title">Judge's checklist &amp; final notes</div>
+      <div class="sec-desc">What judges will look for, and what will get your submission immediately rejected</div>
+      <span class="sec-badge source-tag from2">PDF 2 — Final notes for participants</span>
+    </div>
+  </div>
+
+  <div class="card ag"><div class="card-title">✓ The system must observe, reason, decide, act, evaluate, and adapt</div><div class="card-body">Judges are explicitly looking for all six behaviors in the agent loop. A system that only executes predefined branches does not qualify — even if it produces polished output. Every trace should show the agent observing new information, updating its reasoning, and making decisions it couldn't have made without that new information.</div></div>
+  <div class="card ag"><div class="card-title">✓ Baseline comparison is mandatory and must be demonstrable</div><div class="card-body">Show that your agentic system outperforms a simple heuristic or non-agentic approach on at least one measurable dimension (speed, accuracy, resource efficiency, or coverage). Include this in both the demo and the README.</div></div>
+  <div class="card ag"><div class="card-title">✓ At least one failure / edge case must be live-demonstrated</div><div class="card-body">Robustness evidence is not optional. You must demonstrate at least one of: API failure mid-response, contradictory data handling, missing geolocation, duplicate incident de-duplication, or a false alarm correction — and show how the system recovers without manual intervention.</div></div>
+  <div class="card ag"><div class="card-title">✓ Use realistic mock data if real APIs are unavailable</div><div class="card-body">Clearly label all synthetic data as synthetic. Do not include personal or sensitive information in any mock datasets. Judges accept mock data — they do not accept unlabeled mock data.</div></div>
+  <div class="card ag"><div class="card-title">✓ Reliable end-to-end workflow over broad-but-broken ambition</div><div class="card-body">A solid, complete pipeline on a narrower scope beats an ambitious system that fails or skips stages mid-demo. Build the full end-to-end loop first, then add breadth. Judges reward depth and reliability over coverage and claims.</div></div>
+
+  <hr>
+
+  <div class="warn">
+    <span class="warn-icon">✕</span>
+    <div class="warn-body">
+      <strong>Immediately disqualifying — do not build any of these and call it "agentic":</strong>
+      A simple summarizer. A listing or feed app. A static dashboard. A fixed-rule engine. A hard-coded workflow. Any system that executes predetermined branches without genuinely reasoning about new inputs. Judges will identify and reject these. The test: if the system's behavior doesn't change when it receives new or contradictory information, it is not agentic.
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  CIRO — #AISeekho 2026 · Challenge 3 · Complete reference from PDF 1 (challenge spec) and PDF 2 (shared submission checklist)
+</footer>
+
+</div>
+</body>
+</html>
